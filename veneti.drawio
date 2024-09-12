@@ -1,0 +1,172 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36" version="24.7.10">
+  <diagram name="Page-1" id="PKjlBAT-hxZUs6dOSv4q">
+    <mxGraphModel dx="921" dy="1533" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="umcSkD5OLQDL098Tmigd-72" value="Business Profile Management" style="whiteSpace=wrap;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="234" y="170" width="222" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="umcSkD5OLQDL098Tmigd-73" value="User Interface" style="whiteSpace=wrap;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="286" y="272" width="117" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="umcSkD5OLQDL098Tmigd-74" value="Customer Interaction Tools" style="whiteSpace=wrap;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="241" y="374" width="207" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="umcSkD5OLQDL098Tmigd-75" value="Booking &amp; Queue Management" style="whiteSpace=wrap;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="227" y="476" width="233" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="umcSkD5OLQDL098Tmigd-76" value="External Calendar Service" style="whiteSpace=wrap;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="20" y="579" width="200" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="umcSkD5OLQDL098Tmigd-77" value="Review &amp; Rating Management" style="whiteSpace=wrap;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="367" y="579" width="227" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="umcSkD5OLQDL098Tmigd-78" value="Promotions &amp; Loyalty Programs" style="whiteSpace=wrap;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="362" y="681" width="238" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="umcSkD5OLQDL098Tmigd-79" value="Analytics &amp; Reporting" style="whiteSpace=wrap;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="184" y="783" width="169" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="umcSkD5OLQDL098Tmigd-80" value="Feedback Collection" style="whiteSpace=wrap;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="189" y="885" width="160" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="umcSkD5OLQDL098Tmigd-81" value="Verification Service" style="whiteSpace=wrap;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="404" y="783" width="154" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="umcSkD5OLQDL098Tmigd-82" value="Central Dashboard" style="whiteSpace=wrap;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="407" y="885" width="147" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="umcSkD5OLQDL098Tmigd-83" value="Employee Management" style="whiteSpace=wrap;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="391" y="987" width="180" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="umcSkD5OLQDL098Tmigd-84" value="Notifications &amp; Alerts" style="whiteSpace=wrap;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="397" y="1089" width="168" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="umcSkD5OLQDL098Tmigd-85" value="Create/Edit Profiles" style="curved=1;startArrow=none;endArrow=block;exitX=0.4;exitY=0.99;entryX=0.32;entryY=0;rounded=0;" edge="1" parent="1" source="umcSkD5OLQDL098Tmigd-72" target="umcSkD5OLQDL098Tmigd-73">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="280" y="238" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="umcSkD5OLQDL098Tmigd-86" value="Sector Categorization" style="curved=1;startArrow=none;endArrow=block;exitX=0.65;exitY=0.99;entryX=0.79;entryY=0;rounded=0;" edge="1" parent="1" source="umcSkD5OLQDL098Tmigd-72" target="umcSkD5OLQDL098Tmigd-73">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="449" y="238" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="umcSkD5OLQDL098Tmigd-87" value="Messaging System" style="curved=1;startArrow=none;endArrow=block;exitX=0.36;exitY=0.99;entryX=0.42;entryY=0.01;rounded=0;" edge="1" parent="1" source="umcSkD5OLQDL098Tmigd-73" target="umcSkD5OLQDL098Tmigd-74">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="294" y="340" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="umcSkD5OLQDL098Tmigd-88" value="Contact Options" style="curved=1;startArrow=none;endArrow=block;exitX=0.75;exitY=0.99;entryX=0.64;entryY=0.01;rounded=0;" edge="1" parent="1" source="umcSkD5OLQDL098Tmigd-73" target="umcSkD5OLQDL098Tmigd-74">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="435" y="340" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="umcSkD5OLQDL098Tmigd-89" value="Manage Bookings" style="curved=1;startArrow=none;endArrow=block;exitX=0.33;exitY=1;entryX=0.35;entryY=0.01;rounded=0;" edge="1" parent="1" source="umcSkD5OLQDL098Tmigd-74" target="umcSkD5OLQDL098Tmigd-75">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="236" y="442" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="umcSkD5OLQDL098Tmigd-90" value="Online Queue" style="curved=1;startArrow=none;endArrow=block;exitX=0.53;exitY=1;entryX=0.53;entryY=0.01;rounded=0;" edge="1" parent="1" source="umcSkD5OLQDL098Tmigd-74" target="umcSkD5OLQDL098Tmigd-75">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="365" y="442" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="umcSkD5OLQDL098Tmigd-91" value="Ordering System" style="curved=1;startArrow=none;endArrow=block;exitX=0.74;exitY=1;entryX=0.71;entryY=0.01;rounded=0;" edge="1" parent="1" source="umcSkD5OLQDL098Tmigd-74" target="umcSkD5OLQDL098Tmigd-75">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="492" y="442" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="umcSkD5OLQDL098Tmigd-92" value="Calendar Integration" style="curved=1;startArrow=none;endArrow=block;exitX=0.19;exitY=1;entryX=0.5;entryY=-0.01;rounded=0;" edge="1" parent="1" source="umcSkD5OLQDL098Tmigd-75" target="umcSkD5OLQDL098Tmigd-76">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="120" y="544" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="umcSkD5OLQDL098Tmigd-93" value="View/Respond to Reviews" style="curved=1;startArrow=none;endArrow=block;exitX=0.5;exitY=1;entryX=0.3;entryY=-0.01;rounded=0;" edge="1" parent="1" source="umcSkD5OLQDL098Tmigd-75" target="umcSkD5OLQDL098Tmigd-77">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="344" y="544" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="umcSkD5OLQDL098Tmigd-94" value="Moderate Reviews" style="curved=1;startArrow=none;endArrow=block;exitX=0.75;exitY=1;entryX=0.56;entryY=-0.01;rounded=0;" edge="1" parent="1" source="umcSkD5OLQDL098Tmigd-75" target="umcSkD5OLQDL098Tmigd-77">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="520" y="544" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="umcSkD5OLQDL098Tmigd-95" value="Create Promotions" style="curved=1;startArrow=none;endArrow=block;exitX=0.2;exitY=0.97;entryX=0.21;entryY=-0.01;rounded=0;" edge="1" parent="1" source="umcSkD5OLQDL098Tmigd-77" target="umcSkD5OLQDL098Tmigd-78">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="270" y="646" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="umcSkD5OLQDL098Tmigd-96" value="Loyalty Programs" style="curved=1;startArrow=none;endArrow=block;exitX=0.43;exitY=0.97;entryX=0.43;entryY=-0.01;rounded=0;" edge="1" parent="1" source="umcSkD5OLQDL098Tmigd-77" target="umcSkD5OLQDL098Tmigd-78">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="432" y="646" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="umcSkD5OLQDL098Tmigd-97" value="Subscriptions" style="curved=1;startArrow=none;endArrow=block;exitX=0.62;exitY=0.97;entryX=0.61;entryY=-0.01;rounded=0;" edge="1" parent="1" source="umcSkD5OLQDL098Tmigd-77" target="umcSkD5OLQDL098Tmigd-78">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="560" y="646" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="umcSkD5OLQDL098Tmigd-98" value="Analytics &amp; Insights" style="curved=1;startArrow=none;endArrow=block;exitX=0.21;exitY=0.98;entryX=0.5;entryY=0;rounded=0;" edge="1" parent="1" source="umcSkD5OLQDL098Tmigd-78" target="umcSkD5OLQDL098Tmigd-79">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="269" y="749" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="umcSkD5OLQDL098Tmigd-99" value="Customer Feedback" style="curved=1;startArrow=none;endArrow=block;exitX=0.5;exitY=0.98;entryX=0.5;entryY=0;rounded=0;" edge="1" parent="1" source="umcSkD5OLQDL098Tmigd-79" target="umcSkD5OLQDL098Tmigd-80">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="umcSkD5OLQDL098Tmigd-100" value="Business Verification" style="curved=1;startArrow=none;endArrow=block;exitX=0.5;exitY=0.98;entryX=0.5;entryY=0;rounded=0;" edge="1" parent="1" source="umcSkD5OLQDL098Tmigd-78" target="umcSkD5OLQDL098Tmigd-81">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="umcSkD5OLQDL098Tmigd-101" value="Multi-Location Management" style="curved=1;startArrow=none;endArrow=block;exitX=0.5;exitY=0.98;entryX=0.5;entryY=0;rounded=0;" edge="1" parent="1" source="umcSkD5OLQDL098Tmigd-81" target="umcSkD5OLQDL098Tmigd-82">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="umcSkD5OLQDL098Tmigd-102" value="Employee Access" style="curved=1;startArrow=none;endArrow=block;exitX=0.5;exitY=0.99;entryX=0.5;entryY=0;rounded=0;" edge="1" parent="1" source="umcSkD5OLQDL098Tmigd-82" target="umcSkD5OLQDL098Tmigd-83">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="umcSkD5OLQDL098Tmigd-103" value="Booking Reminders" style="curved=1;startArrow=none;endArrow=block;exitX=0.5;exitY=0.99;entryX=0.5;entryY=0.01;rounded=0;" edge="1" parent="1" source="umcSkD5OLQDL098Tmigd-83" target="umcSkD5OLQDL098Tmigd-84">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

@@ -12,9 +12,9 @@ const businessData = [
   {
     category: 'Restaurants',
     businesses: [
-      { name: 'Tatu Moto', rating: 4.5, logo: '/tatu-logo.png' },
-      { name: 'Choma Zone', rating: 4.0, logo: '/tatu-logo.png' },
-      { name: 'Grill Master', rating: 4.7, logo: '/tatu-logo.png' },
+      { name: 'Tatu Moto', rating: 4.5, logo: '/tatu-moto.png' },
+      { name: 'Choma Zone', rating: 4.0, logo: '/tatu-moto.png' },
+      { name: 'Grill Master', rating: 4.7, logo: '/tatu-moto.png' },
     ],
   },
   {

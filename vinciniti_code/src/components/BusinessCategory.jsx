@@ -10,12 +10,12 @@ const BusinessCategory = ({ category, businesses }) => {
         <Typography variant="h5" sx={{ marginY: 2 }}>
           {category}
         </Typography>
-        <Button size="small" variant="text" sx={{ textTransform: 'none' }}>
+        <Button size="large" variant="text" sx={{ textTransform: 'none' }}>
           view all ➜
         </Button>
       </Box>
 
-      {/* Business Cards */}
+      {/* get the card component and reuse it and pass data to the card */}
       <Box sx={{ display: 'flex', flexWrap: 'wrap' }}>
         {businesses.map((business, index) => (
           <BusinessCard

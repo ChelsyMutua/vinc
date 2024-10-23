@@ -1,12 +1,12 @@
-
 import './App.css'
-// import CustomerSignin from './components/customer-signin';
-// import CustomerSignup from './components/customer-signup';
-import Header from './components/Header'
+import Header from './components/Header';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Hero from './components/Hero';
 import Categories from './components/CaterogyButtons';
 import BusinessCategory from './components/BusinessCategory';
 import { Box } from '@mui/material';
+import Component from './components/business-signup';
+import CustomerSignin from './components/customer-signin';
 
 
 // Sample data structure for categories and businesses
@@ -36,12 +36,39 @@ const businessData = [
 ];
 
 function App() {
- return(
-  <>
-    <Header/>
-    {/* <CustomerSignup /> */}
-  </>
- )
+  return (
+    <Router>
+      <Header />
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <>
+              <Hero />
+              <Categories />
+              <Box
+                sx={{
+                  backgroundColor: '#f9f9f9',
+                  color: '#1d1d1d',
+                  minHeight: '100vh',
+                  padding: '20px',
+                }}
+              >
+                {businessData.map((categoryData, index) => (
+                  <BusinessCategory
+                    key={index}
+                    category={categoryData.category}
+                    businesses={categoryData.businesses}
+                  />
+                ))}
+              </Box>
+              <Component />
+            </>
+          }
+        />
+        <Route path="/signin" element={<CustomerSignin />} />
+      </Routes>
+    </Router>
+  );
 }
-
 export default App;

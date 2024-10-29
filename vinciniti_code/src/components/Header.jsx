@@ -1,25 +1,21 @@
-import {
-  AppBar,
-  Toolbar,
-  Button,
-  TextField,
-  Box,
-  IconButton,
-  Drawer,
-  List,
-  ListItem,
-  ListItemText,
-} from "@mui/material";
+import { AppBar, Toolbar, Button, Box, IconButton, Drawer, List, ListItem, ListItemText, TextField } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import { useState } from "react";
+import CustomerAuthModal from './customer-authmodal'; // Import the combined modal
 
 function Header() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [isModalVisible, setIsModalVisible] = useState(false); // State to control modal visibility
+  const [modalType, setModalType] = useState('signIn'); // State to control which modal (signIn or signUp) is shown
 
   const toggleDrawer = (open) => () => {
-    console.log("Drawer is toggling to:", open);
-    
     setIsDrawerOpen(open);
+  };
+
+  const showModal = (type) => {
+    setModalType(type); // Set modal type (signIn or signUp)
+    setIsModalVisible(true); // Open the modal
+    setIsDrawerOpen(false); // Close the drawer if open
   };
 
   return (
@@ -36,7 +32,7 @@ function Header() {
               marginRight: "10px",
             }}
           />
-          {/* searchbar */}
+          {/* Search bar */}
           <Box sx={{ display: "flex", alignItems: "center" }}>
             <TextField
               placeholder="Search all the Categories"
@@ -58,26 +54,27 @@ function Header() {
               gap: 2,
             }}
           >
-            {/* Buttons for larger screens */}
             <Box
               sx={{
-                display: { xs: "none", md: "flex" }, // Hide on mobile (xs), show on medium and up (md)
+                display: { xs: "none", md: "flex" },
                 gap: 1,
               }}
             >
               <Button
                 variant="outlined"
                 sx={{ bgcolor: "white", color: "black", borderColor: "black" }}
+                onClick={() => showModal('signIn')} // Open Sign In modal
               >
                 Log in
               </Button>
-              <Button variant="contained" sx={{ backgroundColor: "#ff7e73" }}>
+              <Button
+                variant="contained"
+                sx={{ backgroundColor: "#ff7e73" }}
+                onClick={() => showModal('signUp')} // Open Sign Up modal
+              >
                 Sign Up
               </Button>
-              <Button
-                variant="outlined"
-                sx={{ borderColor: "black", color: "black" }}
-              >
+              <Button variant="outlined" sx={{ borderColor: "black", color: "black" }}>
                 Add a business
               </Button>
             </Box>
@@ -87,23 +84,19 @@ function Header() {
               edge="end"
               color="black"
               aria-label="menu"
-              sx={{ display: { xs: "flex", md: "none" } }} // Show on mobile (xs), hide on medium and up (md)
+              sx={{ display: { xs: "flex", md: "none" } }}
               onClick={toggleDrawer(true)}
             >
               <MenuIcon />
             </IconButton>
 
             {/* Drawer (Hamburger Menu) */}
-            <Drawer
-              anchor="right"
-              open={isDrawerOpen}
-              onClose={toggleDrawer(false)}
-            >
+            <Drawer anchor="right" open={isDrawerOpen} onClose={toggleDrawer(false)}>
               <List sx={{ width: 250 }}>
-                <ListItem button onClick={toggleDrawer(false)}>
+                <ListItem button onClick={() => showModal('signIn')}> {/* Close drawer and trigger modal */}
                   <ListItemText primary="Log in" />
                 </ListItem>
-                <ListItem button onClick={toggleDrawer(false)}>
+                <ListItem button onClick={() => showModal('signUp')}>
                   <ListItemText primary="Sign Up" />
                 </ListItem>
                 <ListItem button onClick={toggleDrawer(false)}>
@@ -114,7 +107,11 @@ function Header() {
           </Box>
         </Toolbar>
       </AppBar>
+
+      {/* Pass modal visibility state and modal type to CustomerAuthModal */}
+      <CustomerAuthModal isModalVisible={isModalVisible} setIsModalVisible={setIsModalVisible} modalType={modalType} />
     </>
   );
 }
+
 export default Header;

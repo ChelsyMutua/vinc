@@ -33,7 +33,7 @@ function Hero() {
             sm: "30rem",
             md: "40rem",
             lg: "45rem",
-            xl: "48rem",
+            xl: "56rem",
           },
           padding: "20px",
           color: "white",

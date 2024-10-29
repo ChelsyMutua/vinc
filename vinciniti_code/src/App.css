@@ -1,0 +1,19 @@
+/* Hide the scrollbar but keep horizontal scroll for WebKit browsers */
+.scroll-container {
+    -webkit-overflow-scrolling: touch;  /* Smooth scrolling for iOS */
+  }
+  
+  .scroll-container::-webkit-scrollbar {
+    display: none;  /* Hide scrollbar for Chrome, Safari, etc. */
+  }
+  
+  /* For Firefox */
+  .scroll-container {
+    scrollbar-width: none;  /* Hide scrollbar in Firefox */
+  }
+  
+  /* For IE and Edge */
+  .scroll-container {
+    -ms-overflow-style: none;  /* Hide scrollbar in Internet Explorer and Edge */
+  }
+  

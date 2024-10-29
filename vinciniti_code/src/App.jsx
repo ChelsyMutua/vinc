@@ -4,42 +4,19 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Hero from './components/Hero';
 import Categories from './components/CaterogyButtons';
 import BusinessCategory from './components/BusinessCategory';
+import BusinessProfile from './components/BusinessProfile';
 import { Box } from '@mui/material';
 import Component from './components/business-signup';
 import CustomerSignin from './components/customer-signin';
+import { businessData } from './components/businessData';
 
-
-// Sample data structure for categories and businesses
-const businessData = [
-  {
-    category: 'Restaurants',
-    businesses: [
-      { name: 'Tatu Moto', rating: 4.5, logo: '/tatu-moto.png' },
-      { name: 'Choma Zone', rating: 4.0, logo: '/tatu-moto.png' },
-      { name: 'Grill Master', rating: 4.7, logo: '/tatu-moto.png' },
-    ],
-  },
-  {
-    category: 'Barbershop',
-    businesses: [
-      { name: 'Classic Cuts', rating: 4.2, logo: '/tatu-logo.png' },
-      { name: 'Gents Grooming', rating: 4.3, logo: '/tatu-logo.png' },
-    ],
-  },
-  {
-    category: 'Shoes',
-    businesses: [
-      { name: 'Sneaker World', rating: 4.5, logo: '/tatu-logo.png' },
-      { name: 'Footwear Hub', rating: 4.1, logo: '/tatu-logo.png' },
-    ],
-  },
-];
 
 function App() {
   return (
     <Router>
       <Header />
       <Routes>
+        {/* Homepage Route */}
         <Route
           path="/"
           element={
@@ -67,6 +44,9 @@ function App() {
           }
         />
         <Route path="/signin" element={<CustomerSignin />} />
+
+        {/* Business Profile Route */}
+        <Route path="/business/:businessId" element={<BusinessProfile />} />
       </Routes>
     </Router>
   );

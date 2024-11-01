@@ -40,6 +40,7 @@ function App() {
                 ))}
               </Box>
               <Component />
+              <CustomerSignin />
             </>
           }
         />

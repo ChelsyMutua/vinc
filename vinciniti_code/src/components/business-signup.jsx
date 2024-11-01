@@ -16,8 +16,8 @@ export default function Component() {
     <Layout style={{ minHeight: '100vh' }}>
       <Content style={{ display: 'flex' }}>
         {/* Left side with logo */}
-        <div style={{ flex: 1, background: '#f0f2f5', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-          <img src="/placeholder.svg?height=100&width=200" alt="Vinciniti Logo" style={{ maxWidth: '80%' }} />
+        <div style={{ flex: 1,  display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <img src="public/assets/side_image.png" alt="Vinciniti Logo" style={{ maxWidth: '80%' }} />
         </div>
 
         {/* Right side with form */}

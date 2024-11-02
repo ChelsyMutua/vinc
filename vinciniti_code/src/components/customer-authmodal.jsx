@@ -1,22 +1,95 @@
-import { Form, Button, Modal, Space } from 'antd';
+import React from 'react';
+import { Form, Button, Modal, Space, Divider, message } from 'antd';
 import Input from './auth-inputs';
-import PropTypes from 'prop-types'; // Import PropTypes
-// import { useState } from 'react';
+import PropTypes from 'prop-types';
 
-// const { Title } = Typography;
+const GoogleSignInButton = ({ onClick }) => (
+  <Button 
+    onClick={onClick}
+    style={{ 
+      width: '100%', 
+      backgroundColor: 'white', 
+      borderColor: '#ccc', 
+      color: '#757575',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center'
+    }}
+  >
+    <img 
+      src="/assets/search.png" 
+      alt="Google" 
+      style={{ 
+        width: '18px', 
+        height: '18px', 
+        marginRight: '8px'
+      }} 
+    />
+    Sign in with Google
+  </Button>
+);
+
+GoogleSignInButton.propTypes = {
+  onClick: PropTypes.func.isRequired,
+};
 
 const CustomerAuthModal = ({ isModalVisible, setIsModalVisible, modalType }) => {
   const [form] = Form.useForm();
+  const [loading, setLoading] = React.useState(false);
 
   const handleCancel = () => {
-    setIsModalVisible(false); // Close modal on cancel
+    setIsModalVisible(false);
   };
 
-  const onFinish = (values) => {
-    console.log('Received values:', values);
+  const onFinish = async (values) => {
+    setLoading(true);
+    try {
+      let response;
+      if (modalType === 'signIn') {
+        response = await signInUser(values);
+      } else {
+        response = await signUpUser(values);
+      }
+
+      if (response.success) {
+        message.success(response.message);
+        setIsModalVisible(false);
+        // Handle successful authentication (e.g., update app state, redirect)
+      } else {
+        message.error(response.message);
+      }
+    } catch (error) {
+      console.error('Authentication error:', error);
+      message.error('An error occurred. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // Conditional title and form fields based on modalType (signIn or signUp)
+  const handleGoogleSignIn = async () => {
+    setLoading(true);
+    try {
+      const response = await signInWithGoogle();
+      if (response.success) {
+        message.success('Successfully signed in with Google');
+        setIsModalVisible(false);
+        // Handle successful authentication
+      } else {
+        message.error(response.message);
+      }
+    } catch (error) {
+      console.error('Google Sign In error:', error);
+      message.error('An error occurred with Google Sign In. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleForgotPassword = () => {
+    // Implement forgot password logic here
+    console.log('Forgot Password clicked');
+  };
+
   const renderFormFields = () => {
     if (modalType === 'signIn') {
       return (
@@ -40,9 +113,13 @@ const CustomerAuthModal = ({ isModalVisible, setIsModalVisible, modalType }) => 
             <Button
               htmlType="submit"
               style={{ width: '100%', backgroundColor: '#FE6F61', borderColor: '#FE6F61', color: 'white' }}
+              loading={loading}
             >
               Sign In
             </Button>
+          </Form.Item>
+          <Form.Item>
+            <a onClick={handleForgotPassword}>Forgot Password?</a>
           </Form.Item>
         </>
       );
@@ -98,6 +175,7 @@ const CustomerAuthModal = ({ isModalVisible, setIsModalVisible, modalType }) => 
             <Button
               htmlType="submit"
               style={{ width: '100%', backgroundColor: '#FE6F61', borderColor: '#FE6F61', color: 'white' }}
+              loading={loading}
             >
               Sign Up
             </Button>
@@ -108,31 +186,54 @@ const CustomerAuthModal = ({ isModalVisible, setIsModalVisible, modalType }) => 
   };
 
   return (
-    <>
-      {/* Modal for Sign In and Sign Up Form */}
-      <Modal
-        title={modalType === 'signIn' ? 'Sign In to Vinciniti' : 'Sign Up for Vinciniti'}
-        visible={isModalVisible}
-        onCancel={handleCancel}
-        footer={null}
-        centered // Ensures the modal is vertically and horizontally centered
-        width={400} // Set custom width to make it slim
-        style={{ top: 20 }} // Adjust the vertical spacing if needed
-        bodyStyle={{ padding: '20px 40px' }} // Custom padding for a slim look
-      >
-        <Form form={form} onFinish={onFinish} layout="vertical" scrollToFirstError>
-          {renderFormFields()}
-        </Form>
-      </Modal>
-    </>
+    <Modal
+      title={modalType === 'signIn' ? 'Sign In to Vinciniti' : 'Sign Up for Vinciniti'}
+      visible={isModalVisible}
+      onCancel={handleCancel}
+      footer={null}
+      centered
+      width={400}
+      style={{ top: 20 }}
+      bodyStyle={{ padding: '20px 40px' }}
+    >
+      <Form form={form} onFinish={onFinish} layout="vertical" scrollToFirstError>
+        {renderFormFields()}
+        <Divider plain>or</Divider>
+        <Form.Item>
+          <GoogleSignInButton onClick={handleGoogleSignIn} />
+        </Form.Item>
+      </Form>
+    </Modal>
   );
 };
 
-// Add PropTypes for prop validation
 CustomerAuthModal.propTypes = {
-  isModalVisible: PropTypes.bool.isRequired, // Validate isModalVisible as a required boolean
-  setIsModalVisible: PropTypes.func.isRequired, // Validate setIsModalVisible as a required function
-  modalType: PropTypes.oneOf(['signIn', 'signUp']).isRequired, // Validate modalType as 'signIn' or 'signUp'
+  isModalVisible: PropTypes.bool.isRequired,
+  setIsModalVisible: PropTypes.func.isRequired,
+  modalType: PropTypes.oneOf(['signIn', 'signUp']).isRequired,
 };
 
 export default CustomerAuthModal;
+
+// Pseudo-code for backend integration
+async function signInUser(values) {
+  // API call to sign in user
+  // Check if user exists and password is correct
+  // Check if user is verified
+  // Return { success: true/false, message: '...' }
+}
+
+async function signUpUser(values) {
+  // API call to sign up user
+  // Create user in database with is_verified set to false and is_google_user set to false
+  // Send verification email
+  message.success('Please check your email to verify your account');
+  // Return { success: true, message: 'Please check your email to verify your account' }
+}
+
+async function signInWithGoogle() {
+  // Implement Google Sign In
+  // Check if user exists in database
+  // If not, create new user with is_google_user set to true and is_verified set to true
+  // Return { success: true/false, message: '...' }
+}

@@ -1,7 +1,7 @@
 const express = require('express');
 const dotenv = require('dotenv');
 const { Pool } = require('pg');
-const cors = require('cors')
+
 
 
 // Load environment variables
@@ -12,10 +12,6 @@ const app = express();
 
 
 
-app.use(cors({
-    origin: ['http://localhost:5173', 'https://statistics-production-032c.up.railway.app'], 
-    methods: 'GET,POST', 
-}));
 
 // Middleware to parse JSON
 app.use(express.json());

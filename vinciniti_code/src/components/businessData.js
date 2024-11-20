@@ -29,7 +29,7 @@ export const businessData = [
           businessImage: '/assets/oppo.png',
           heroImage: '/assets/oppo.png',
           menu: [
-            { item: 'Grilled Chicken', price: '500/= ', image: '/assets/grilled-chicken.png' },
+            { item: 'Grilled Chicken', price: '500/= ', image: '/assets/grilled.png' },
           ],
         },
         {

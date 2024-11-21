@@ -3,7 +3,7 @@ const dotenv = require('dotenv');
 const router = express.Router();
 const { Pool } = require('pg');
 const cors = require('cors')
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const session = require('express-session');
 const PgSession = require('connect-pg-simple')(session);
 

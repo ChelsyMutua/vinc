@@ -1,0 +1,6 @@
+>>>>>>>🔭🔭🔭🔭🔭🔭🔭🔭MAterial ui
+- we can use things like containers to add padding to left and write and use ist like  a div
+- We also have sx {{ bgcolor}} this is is like the style elemnt where we can change p ,m py px bgcolor on the fly
+🫁 to get or use padding we do sx{{p :1}} by default padding begins from 8px
+- we also  have typography  this is liek text element but now we can customize it on the fly <typography varient="h1"></typography>
+- we use thevariant prop to change what is happening .

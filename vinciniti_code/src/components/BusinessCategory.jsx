@@ -1,20 +1,9 @@
-import { Typography, Box, Button, Container, Grid } from "@mui/material";
+import { Typography, Box, Button } from "@mui/material";
 import PropTypes from "prop-types";
 import BusinessCard from "./BusinessCard";
 import { useState } from "react";
-import { styled } from "@mui/material/styles";
 
 // Styled component for the scrollable container
-const ScrollableBox = styled(Box)({
-  display: "flex",
-  overflowX: "auto",
-  scrollBehavior: "smooth",
-  "&::-webkit-scrollbar": {
-    display: "none", // Hide scrollbar for Chrome, Safari, and newer Edge
-  },
-  "-ms-overflow-style": "none", // Hide scrollbar for IE and older Edge
-  "scrollbar-width": "none", // Hide scrollbar for Firefox
-});
 
 const BusinessCategory = ({ category, businesses }) => {
   const [viewAll, setViewAll] = useState(false);
@@ -52,55 +41,40 @@ const BusinessCategory = ({ category, businesses }) => {
         </Button>
       </Box>
 
-      {viewAll ? (
-        // Grid view when "View all" is clicked
-        <Grid Container spacing={1}>
-          {businesses.map((business) => (
-            <Grid item xs={12} sm={12} md={6} lg={4} xl={2} key={business.id}>
-              <BusinessCard
-                key={business.id}
-                name={business.name}
-                rating={business.rating}
-                logo={business.logo}
-                businessId={business.id}
-                openingTime={business.openingTime}
-                closingTime={business.closingTime}
-                businessData={business}
-              />
-            </Grid>
-          ))}
-        </Grid>
-      ) : (
-        // Scrollable row view
-        <ScrollableBox
-          sx={{
-            gap: 17,
-            pb: 1, // Add padding bottom for scrollbar
-            "& > div": {
-              flex: "0 0 auto",
-              width: {
-                xs: "280px", // Width on extra-small screens
-                sm: "300px", // Width on small screens and up
-              },
+      {/* Dynamic Layout based on viewAll */}
+      <Box
+        sx={{
+          display: "flex",
+          flexWrap: viewAll ? "wrap" : "nowrap", // Wrap when "View All" is clicked
+          gap: 12,
+          overflowX: viewAll ? "visible" : "auto", // Only enable scrolling when viewAll is false
+          // pb: 1,
+          "& > div": {
+            flex: "0 0 auto",
+            width: {
+              xs: "280px", // Width on extra-small screens
+              sm: "300px", // Width on small screens and up
+              md: "340px", // Width on medium screens and up
             },
-          }}
-        >
-          {/* when viw all is false */}
-          {businesses.map((business) => (
-            <Box key={business.id}>
-              <BusinessCard
-                businessId={business.id}
-                name={business.name}
-                rating={business.rating}
-                logo={business.logo}
-                openingTime={business.openingTime}
-                closingTime={business.closingTime}
-                businessData={business}
-              />
-            </Box>
-          ))}
-        </ScrollableBox>
-      )}
+          },
+        }}
+      >
+        {businesses.map((business) => (
+          <Box key={business.id}>
+            <BusinessCard
+              businessId={business.id}
+              name={business.name}
+              rating={business.rating}
+              logo={business.logo}
+              openingTime={business.openingTime}
+              closingTime={business.closingTime}
+              businessData={business}
+              address={business.address}
+              reviews={business.reviews}
+            />
+          </Box>
+        ))}
+      </Box>
     </Box>
   );
 };
@@ -113,6 +87,8 @@ BusinessCategory.propTypes = {
       name: PropTypes.string.isRequired,
       rating: PropTypes.number.isRequired,
       logo: PropTypes.string.isRequired,
+      address: PropTypes.string.isRequired,
+      reviews: PropTypes.number.isRequired,
     })
   ).isRequired,
 };

@@ -1,22 +1,5 @@
 import { Box, Button } from "@mui/material";
-
-const categoryIcons = {
-  Barbershop: "/assets/barbershop.png",
-  Restaurant: "/assets/restaurant.png",
-  shoes: "/assets/shoes.png",
-  Saloon: "/assets/beauty-saloon.png",
-  Nail: "/assets/nail.png",
-  Cloths: "/assets/tshirt.png",
-};
-
-const categories = [
-  "Barbershop",
-  "Restaurant",
-  "shoes",
-  "Saloon",
-  "Nail",
-  "Cloths",
-];
+import { businessData } from './businessData';
 
 function Categories() {
   return (
@@ -28,7 +11,7 @@ function Categories() {
           marginY: 3,
           paddingX: "20px",
           overflowX: "auto", // Enable horizontal scrolling
-          overflowY:"hidden",
+          overflowY: "hidden",
           whiteSpace: "nowrap", // Prevent the buttons from wrapping to a new line
           scrollbarWidth: "none", // Make scrollbar thinner (for Firefox)
           "&::-webkit-scrollbar": {
@@ -43,7 +26,7 @@ function Categories() {
           },
         }}
       >
-        {categories.map((category) => (
+        {businessData.map(({ category, icon }) => (
           <Button
             key={category}
             variant="outlined"
@@ -52,15 +35,15 @@ function Categories() {
               color: "black",
               fontSize: "1.20rem",
               borderRadius: "15px",
-              display:"inline-flex", // ensure buttons remain in a single row
-              alignItems:'center',
-              flexShrink:0, //prevent buttons from shrinking in the inside
+              display: "inline-flex", // Ensure buttons remain in a single row
+              alignItems: 'center',
+              flexShrink: 0, // Prevent buttons from shrinking inside
             }}
           >
             {/* Show the icon next to the text */}
             <Box
               component="img"
-              src={categoryIcons[category]} // Use the icon from the categoryIcons mapping
+              src={icon} // Use the icon directly from the businessData
               alt={`${category} icon`}
               sx={{
                 width: "2.1825rem",

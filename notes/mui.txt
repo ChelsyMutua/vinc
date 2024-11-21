@@ -4,3 +4,32 @@
 🫁 to get or use padding we do sx{{p :1}} by default padding begins from 8px
 - we also  have typography  this is liek text element but now we can customize it on the fly <typography varient="h1"></typography>
 - we use thevariant prop to change what is happening .
+
+
+
+ <Divider plain>or</Divider>
+        <Form.Item>
+          {/* <GoogleSignInButton onClick={handleGoogleSignIn} /> */}
+        </Form.Item>
+
+
+
+
+  const handleGoogleSignIn = async () => {
+    setLoading(true);
+    try {
+      const response = await signInWithGoogle();
+      if (response.success) {
+        message.success('Successfully signed in with Google');
+        setIsModalVisible(false);
+        // Handle successful authentication
+      } else {
+        message.error(response.message);
+      }
+    } catch (error) {
+      console.error('Google Sign In error:', error);
+      message.error('An error occurred with Google Sign In. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };

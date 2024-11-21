@@ -1,6 +1,5 @@
-import './App.css'
+import { BrowserRouter as Router, Route, Routes, useLocation } from "react-router-dom";
 import Header from './components/Header';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Hero from './components/Hero';
 import Categories from './components/CaterogyButtons';
 import BusinessCategory from './components/BusinessCategory';
@@ -9,14 +8,32 @@ import { Box } from '@mui/material';
 import Component from './components/business-signup';
 import CustomerSignin from './components/customer-signin';
 import { businessData } from './components/businessData';
+import BusinessListScreen from './components/business-list';
+import SignUpConfirmation from "./components/confirm_screen";
+import BusinessProfileManagement from "./components/business_dash";
 
+// Wrapper to conditionally render Header
+const AppWithHeader = () => {
+  const location = useLocation();
+  
+  // List of paths where header should not appear
+  const noHeaderPaths = [
+    '/business/',  // Business profile pages
+    '/signup-business' , // Business signup page
+    "/signup-confirmation",
+    "/business-dashboard"
+  ];
+  
+  // Check if current path should hide header
+  const shouldHideHeader = noHeaderPaths.some(path => 
+    location.pathname.startsWith(path)
+  );
 
-function App() {
   return (
-    <Router>
-      <Header />
+    <>
+      {/* Only render the Header if not on excluded pages */}
+      {!shouldHideHeader && <Header />}
       <Routes>
-        {/* Homepage Route */}
         <Route
           path="/"
           element={
@@ -25,7 +42,7 @@ function App() {
               <Categories />
               <Box
                 sx={{
-                  backgroundColor: '#f9f9f9',
+                  backgroundColor: '#',
                   color: '#1d1d1d',
                   minHeight: '100vh',
                   padding: '20px',
@@ -39,17 +56,24 @@ function App() {
                   />
                 ))}
               </Box>
-              <Component />
-              <CustomerSignin />
             </>
           }
         />
+        <Route path="/businesses" element={<BusinessListScreen />} />
         <Route path="/signin" element={<CustomerSignin />} />
-
-        {/* Business Profile Route */}
+        <Route path="/signup-business" element={<Component />} />
+        <Route path="/signup-confirmation" element={<SignUpConfirmation />} />
+        <Route path="/business-dashboard" element={<BusinessProfileManagement />} />
         <Route path="/business/:businessId" element={<BusinessProfile />} />
       </Routes>
-    </Router>
+    </>
   );
-}
+};
+
+const App = () => (
+  <Router>
+    <AppWithHeader />
+  </Router>
+);
+
 export default App;

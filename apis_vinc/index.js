@@ -2,11 +2,14 @@ const express = require('express');
 const dotenv = require('dotenv');
 const router = express.Router();
 const { Pool } = require('pg');
+<<<<<<< HEAD
 const cors = require('cors')
 const bcrypt = require('bcrypt');
 const session = require('express-session');
 const PgSession = require('connect-pg-simple')(session);
 
+=======
+>>>>>>> db1ddfb205674f322ab43cc56f5d36ba281760d1
 
 
 
@@ -16,6 +19,14 @@ dotenv.config();
 // Initialize Express
 const app = express();
 
+<<<<<<< HEAD
+=======
+// Middleware to parse JSON
+app.use(express.json());
+
+// Define the server port
+const PORT = process.env.PORT || 3000;
+>>>>>>> db1ddfb205674f322ab43cc56f5d36ba281760d1
 
 // PostgreSQL connection pool
 const pool = new Pool({
@@ -73,6 +84,7 @@ app.get('/', (req, res) => {
   res.send('API is working!');
 });
 
+<<<<<<< HEAD
 // Add a new user
 router.post('/users', async (req, res) => {
   const { first_name, last_name, email, password, phone_number, role = 'customer' } = req.body; // Default role to 'customer'
@@ -287,3 +299,9 @@ router.post('/businesses/profile', async (req, res) => {
   }
 });
 
+=======
+// Make sure the server is listening
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
+>>>>>>> db1ddfb205674f322ab43cc56f5d36ba281760d1

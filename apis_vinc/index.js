@@ -10,9 +10,6 @@ dotenv.config();
 // Initialize Express
 const app = express();
 
-
-
-
 // Middleware to parse JSON
 app.use(express.json());
 
@@ -43,4 +40,9 @@ pool.connect((err, client, release) => {
 // Sample route
 app.get('/', (req, res) => {
   res.send('API is working!');
+});
+
+// Make sure the server is listening
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
 });

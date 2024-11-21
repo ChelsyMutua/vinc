@@ -1,23 +1,18 @@
-
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, Typography, Box } from "@mui/material";
 import PropTypes from 'prop-types';
-import { Business } from "@mui/icons-material";
+import { Star } from "@mui/icons-material";
 
-//? destructuring for props
-const BusinessCard = ({ name, rating, logo,businessId ,openingTime,closingTime}) => {
+const BusinessCard = ({ name, rating, logo, businessId, openingTime, closingTime, address, reviews }) => {
+  const navigate = useNavigate();
 
-  const navigate = useNavigate(); // get the navigation function
-
-  const handleCardClick = () =>{
-    console.log(`this is the ${businessId}`); // check the id.
-    
-    navigate(`/business/${businessId}`); // navigate to the business profile.
-  }
+  const handleCardClick = () => {
+    console.log(`this is the ${businessId}`);
+    navigate(`/business/${businessId}`);
+  };
 
   return (
-    <Card sx={{ width: 400, height:410, margin: 2,cursor: 'pointer' }} onClick = {handleCardClick}>
-      
+    <Card sx={{ backgroundColor: '#f9f9f9',width: 400, height: 360, margin: 2, cursor: 'pointer', borderRadius: '14px'}} onClick={handleCardClick}>
       {/* Business Logo */}
       <Box
         sx={{
@@ -26,38 +21,58 @@ const BusinessCard = ({ name, rating, logo,businessId ,openingTime,closingTime})
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
+          position: "relative"
         }}
       >
-        <img src={logo} alt={name} style={{ width: "100%" }} />
+       <img src={logo} alt={name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+        <Box
+          sx={{
+            position: "absolute",
+            bottom: 10,
+            left:8,
+            width: 'auto',
+            bgcolor: "rgba(0, 0, 0, 0.6)",
+            color: "white",
+            display: "flex",
+            alignItems: "center",
+            padding: "0.5rem",
+            borderRadius: "16px"
+          }}
+        >
+          <Box sx={{ display: "flex", alignItems: "center" }}>
+          <Star sx={{ color: "#FFD700", fontSize: "1rem" }} />
+            <Typography variant="body2" sx={{ marginLeft: 0.5 }}>
+              {rating.toFixed(1)} ({reviews} reviews)
+            </Typography>
+          </Box>
+        </Box>
       </Box>
 
       {/* Card Information */}
       <CardContent>
-        <Typography
-          variant="subtitle1" // Use a valid variant
-          sx={{ fontWeight: "bold" }}
-          mt={9}
-        >
+        <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>
           {name}
         </Typography>
-        <Typography variant="p">Opening :{openingTime}</Typography>
-        <Typography variant="p" sx={{marginLeft:1}}>Closing :{closingTime}</Typography>
-        <Typography variant="body2" sx={{ color: "#ff7e73" }}>
-          {/* Display Rating as Stars */}
-          {"★".repeat(Math.floor(rating))}
-          {"☆".repeat(5 - Math.floor(rating))}
+        <Typography variant="body2" sx={{ color: "text.secondary" }}>
+          Opening: {openingTime} | Closing: {closingTime}
+        </Typography>
+        <Typography variant="body2" sx={{ color: "primary.main", marginTop: 1 }}>
+          {address}
         </Typography>
       </CardContent>
     </Card>
   );
 };
 
-// PropTypes Validation for BusinessCard
 BusinessCard.propTypes = {
-  name: PropTypes.string.isRequired, // name must be a string
-  rating: PropTypes.number.isRequired, // rating must be a number
-  logo: PropTypes.string.isRequired, // logo must be a string (URL or path)
-  businessId:PropTypes.string.isRequired,
+  name: PropTypes.string.isRequired,
+  rating: PropTypes.number.isRequired,
+  logo: PropTypes.string.isRequired,
+  businessId: PropTypes.string.isRequired,
+  openingTime: PropTypes.string.isRequired,
+  closingTime: PropTypes.string.isRequired,
+  address: PropTypes.string.isRequired,
+  reviews: PropTypes.number.isRequired,
 };
 
 export default BusinessCard;

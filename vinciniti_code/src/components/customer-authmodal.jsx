@@ -1,5 +1,5 @@
 import React from 'react';
-import { Form, Button, Modal, Space, Divider, message } from 'antd';
+import { Form, Button, Modal, Space, message } from 'antd';
 import Input from './auth-inputs';
 import PropTypes from 'prop-types';
 
@@ -66,24 +66,7 @@ const CustomerAuthModal = ({ isModalVisible, setIsModalVisible, modalType }) => 
     }
   };
 
-  const handleGoogleSignIn = async () => {
-    setLoading(true);
-    try {
-      const response = await signInWithGoogle();
-      if (response.success) {
-        message.success('Successfully signed in with Google');
-        setIsModalVisible(false);
-        // Handle successful authentication
-      } else {
-        message.error(response.message);
-      }
-    } catch (error) {
-      console.error('Google Sign In error:', error);
-      message.error('An error occurred with Google Sign In. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
+
 
   const handleForgotPassword = () => {
     // Implement forgot password logic here
@@ -198,10 +181,7 @@ const CustomerAuthModal = ({ isModalVisible, setIsModalVisible, modalType }) => 
     >
       <Form form={form} onFinish={onFinish} layout="vertical" scrollToFirstError>
         {renderFormFields()}
-        <Divider plain>or</Divider>
-        <Form.Item>
-          <GoogleSignInButton onClick={handleGoogleSignIn} />
-        </Form.Item>
+       
       </Form>
     </Modal>
   );

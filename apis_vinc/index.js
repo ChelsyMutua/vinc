@@ -50,7 +50,6 @@ app.use(
 // Mount routes after session middleware
 app.use('/api', router);
 
-// Define the server port
 
 // Test database connection
 pool.connect((err, client, release) => {
@@ -61,7 +60,6 @@ pool.connect((err, client, release) => {
   release();
 });
 
-app.listen(3000, () => {
 
 
 // Sample route

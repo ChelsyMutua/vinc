@@ -285,6 +285,6 @@ router.post('/businesses/profile', async (req, res) => {
 // Define the server port
 const PORT = process.env.PORT || 3000;
 
-app.listen(3000, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+app.listen(PORT, () => {
+  console.log(`Server is running on ${PORT}`);
 });

@@ -77,6 +77,9 @@ app.get('/', (req, res) => {
 
 // Add a new user
 router.post('/users', async (req, res) => {
+
+  console.log('POST /api/users hit');
+  console.log('Request body:', req.body);
   const { first_name, last_name, email, password, phone_number, role = 'customer' } = req.body; // Default role to 'customer'
 
   // Validate required fields

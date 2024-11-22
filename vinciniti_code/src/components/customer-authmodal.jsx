@@ -75,6 +75,8 @@ async function signInUser(values) {
 
 
 
+
+
 const CustomerAuthModal = ({ isModalVisible, setIsModalVisible, modalType }) => {
   const [form] = Form.useForm();
   const [loading, setLoading] = React.useState(false);

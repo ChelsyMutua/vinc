@@ -29,6 +29,14 @@ const pool = new Pool({
   },
 });
 
+app.use(cors({
+  origin:  'https://vinc-production-3a9e.up.railway.app', // Frontend URL
+  credentials: true, // Allow session cookies to be sent
+  mthods: 'GET, POST',
+  allowedHeaders: ['Content-Type']
+}));
+
+
 
 // Middleware to parse JSON
 app.use(express.json());

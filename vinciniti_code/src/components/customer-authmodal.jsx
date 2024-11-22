@@ -2,80 +2,49 @@ import React from 'react';
 import { Form, Button, Modal, Space, message } from 'antd';
 import Input from './auth-inputs';
 import PropTypes from 'prop-types';
+import axios from 'axios';
 
+const API_BASE_URL = 'https://vinc-production-3a9e.up.railway.app';
+
+// Axios instance (optional but recommended for reusability)
+const axiosInstance = axios.create({
+  baseURL: API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  withCredentials: true, // If you need to include cookies
+});
+
+// Signup function
 async function signUpUser(values) {
   try {
-    const data = {
-      first_name: values.first_name,
-      last_name: values.last_name,
-      email: values.email,
-      password: values.password,
-      confirm_password: values.confirm_password,
-      phone_number: values.phone_number,
-    };
-
-    const response = await fetch('/api/users', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Error response:', errorText);
-      return { success: false, message: 'Failed to sign up. Please try again.' };
-    }
-
-    let result;
-    try {
-      result = await response.json();
-    } catch (err) {
-      console.error('Error parsing JSON:', err);
-      return { success: false, message: 'Unexpected server response. Please try again.' };
-    }
-
-    return { success: true, message: result.message };
+    const { data } = await axiosInstance.post('/users', values); // No need for JSON.stringify
+    return { success: true, message: data.message };
   } catch (error) {
     console.error('Error signing up:', error);
-    return { success: false, message: 'An error occurred. Please try again.' };
+
+    // Extract error message from response if available
+    const errorMessage =
+      error.response?.data?.message || 'Failed to sign up. Please try again.';
+      console.log(errorMessage);
+    return { success: false, message: errorMessage };
+  
   }
 }
 
-
+// Signin function
 async function signInUser(values) {
   try {
-    const data = {
-      email: values.email,
-      password: values.password,
-    };
-
-    const response = await fetch('/api/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include', // Important for session cookies
-      body: JSON.stringify(data),
-    });
-
-    const result = await response.json();
-
-    if (response.ok) {
-      return { success: true, message: result.message };
-    } else {
-      return { success: false, message: result.message };
-    }
+    const { data } = await axiosInstance.post('/login', values);
+    return { success: true, message: data.message };
   } catch (error) {
     console.error('Error signing in:', error);
-    return { success: false, message: 'An error occurred. Please try again.' };
+
+    const errorMessage =
+      error.response?.data?.message || 'Failed to sign in. Please try again.';
+    return { success: false, message: errorMessage };
   }
 }
-
-
-
-
 
 const CustomerAuthModal = ({ isModalVisible, setIsModalVisible, modalType }) => {
   const [form] = Form.useForm();
@@ -94,7 +63,7 @@ const CustomerAuthModal = ({ isModalVisible, setIsModalVisible, modalType }) => 
       } else {
         response = await signUpUser(values);
       }
-  
+
       if (response.success) {
         message.success(response.message);
         setIsModalVisible(false);
@@ -109,12 +78,8 @@ const CustomerAuthModal = ({ isModalVisible, setIsModalVisible, modalType }) => 
       setLoading(false);
     }
   };
-  
-
-
 
   const handleForgotPassword = () => {
-    // Implement forgot password logic here
     console.log('Forgot Password clicked');
   };
 
@@ -128,7 +93,7 @@ const CustomerAuthModal = ({ isModalVisible, setIsModalVisible, modalType }) => 
             name="email"
             rules={[
               { type: 'email', message: 'The input is not a valid E-mail!' },
-              { required: true, message: 'Please input your E-mail!' }
+              { required: true, message: 'Please input your E-mail!' },
             ]}
           />
           <Input
@@ -140,7 +105,12 @@ const CustomerAuthModal = ({ isModalVisible, setIsModalVisible, modalType }) => 
           <Form.Item>
             <Button
               htmlType="submit"
-              style={{ width: '100%', backgroundColor: '#FE6F61', borderColor: '#FE6F61', color: 'white' }}
+              style={{
+                width: '100%',
+                backgroundColor: '#FE6F61',
+                borderColor: '#FE6F61',
+                color: 'white',
+              }}
               loading={loading}
             >
               Sign In
@@ -174,8 +144,14 @@ const CustomerAuthModal = ({ isModalVisible, setIsModalVisible, modalType }) => 
             name="email"
             rules={[
               { type: 'email', message: 'The input is not a valid E-mail!' },
-              { required: true, message: 'Please input your E-mail!' }
+              { required: true, message: 'Please input your E-mail!' },
             ]}
+          />
+          <Input
+            type="text"
+            placeholder="Phone Number"
+            name="phone_number"
+            rules={[{ required: false }]}
           />
           <Input
             type="password"
@@ -194,7 +170,9 @@ const CustomerAuthModal = ({ isModalVisible, setIsModalVisible, modalType }) => 
                   if (!value || getFieldValue('password') === value) {
                     return Promise.resolve();
                   }
-                  return Promise.reject(new Error('The two passwords that you entered do not match!'));
+                  return Promise.reject(
+                    new Error('The two passwords that you entered do not match!')
+                  );
                 },
               }),
             ]}
@@ -202,7 +180,12 @@ const CustomerAuthModal = ({ isModalVisible, setIsModalVisible, modalType }) => 
           <Form.Item>
             <Button
               htmlType="submit"
-              style={{ width: '100%', backgroundColor: '#FE6F61', borderColor: '#FE6F61', color: 'white' }}
+              style={{
+                width: '100%',
+                backgroundColor: '#FE6F61',
+                borderColor: '#FE6F61',
+                color: 'white',
+              }}
               loading={loading}
             >
               Sign Up
@@ -227,7 +210,7 @@ const CustomerAuthModal = ({ isModalVisible, setIsModalVisible, modalType }) => 
         {renderFormFields()}
       </Form>
     </Modal>
-  );  
+  );
 };
 
 CustomerAuthModal.propTypes = {
@@ -237,4 +220,3 @@ CustomerAuthModal.propTypes = {
 };
 
 export default CustomerAuthModal;
-

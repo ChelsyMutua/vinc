@@ -51,8 +51,6 @@ app.use(
 app.use('/api', router);
 
 // Define the server port
-const PORT = process.env.PORT || 3000;
-
 
 // Test database connection
 pool.connect((err, client, release) => {
@@ -64,8 +62,6 @@ pool.connect((err, client, release) => {
 });
 
 app.listen(3000, () => {
-  console.log('Server is running on http://localhost:3000');
-});
 
 
 // Sample route
@@ -285,4 +281,12 @@ router.post('/businesses/profile', async (req, res) => {
     console.error('Error creating business profile:', error);
     res.status(500).json({ message: 'Internal Server Error' });
   }
+});
+
+
+// Define the server port
+const PORT = process.env.PORT || 3000;
+
+app.listen(3000, () => {
+  console.log('Server is running on http://localhost:${PORT}');
 });

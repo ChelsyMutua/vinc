@@ -3,35 +3,77 @@ import { Form, Button, Modal, Space, message } from 'antd';
 import Input from './auth-inputs';
 import PropTypes from 'prop-types';
 
-const GoogleSignInButton = ({ onClick }) => (
-  <Button 
-    onClick={onClick}
-    style={{ 
-      width: '100%', 
-      backgroundColor: 'white', 
-      borderColor: '#ccc', 
-      color: '#757575',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center'
-    }}
-  >
-    <img 
-      src="/assets/search.png" 
-      alt="Google" 
-      style={{ 
-        width: '18px', 
-        height: '18px', 
-        marginRight: '8px'
-      }} 
-    />
-    Sign in with Google
-  </Button>
-);
+async function signUpUser(values) {
+  try {
+    const data = {
+      first_name: values.first_name,
+      last_name: values.last_name,
+      email: values.email,
+      password: values.password,
+      confirm_password: values.confirm_password,
+      phone_number: values.phone_number,
+    };
 
-GoogleSignInButton.propTypes = {
-  onClick: PropTypes.func.isRequired,
-};
+    const response = await fetch('/api/users', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Error response:', errorText);
+      return { success: false, message: 'Failed to sign up. Please try again.' };
+    }
+
+    let result;
+    try {
+      result = await response.json();
+    } catch (err) {
+      console.error('Error parsing JSON:', err);
+      return { success: false, message: 'Unexpected server response. Please try again.' };
+    }
+
+    return { success: true, message: result.message };
+  } catch (error) {
+    console.error('Error signing up:', error);
+    return { success: false, message: 'An error occurred. Please try again.' };
+  }
+}
+
+
+async function signInUser(values) {
+  try {
+    const data = {
+      email: values.email,
+      password: values.password,
+    };
+
+    const response = await fetch('/api/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include', // Important for session cookies
+      body: JSON.stringify(data),
+    });
+
+    const result = await response.json();
+
+    if (response.ok) {
+      return { success: true, message: result.message };
+    } else {
+      return { success: false, message: result.message };
+    }
+  } catch (error) {
+    console.error('Error signing in:', error);
+    return { success: false, message: 'An error occurred. Please try again.' };
+  }
+}
+
+
 
 const CustomerAuthModal = ({ isModalVisible, setIsModalVisible, modalType }) => {
   const [form] = Form.useForm();
@@ -50,11 +92,11 @@ const CustomerAuthModal = ({ isModalVisible, setIsModalVisible, modalType }) => 
       } else {
         response = await signUpUser(values);
       }
-
+  
       if (response.success) {
         message.success(response.message);
         setIsModalVisible(false);
-        // Handle successful authentication (e.g., update app state, redirect)
+        // Optionally, fetch user profile or redirect
       } else {
         message.error(response.message);
       }
@@ -65,6 +107,7 @@ const CustomerAuthModal = ({ isModalVisible, setIsModalVisible, modalType }) => 
       setLoading(false);
     }
   };
+  
 
 
 
@@ -113,13 +156,13 @@ const CustomerAuthModal = ({ isModalVisible, setIsModalVisible, modalType }) => 
             <Input
               type="text"
               placeholder="First Name"
-              name="firstName"
+              name="first_name"
               rules={[{ required: true, message: 'Please input your first name!' }]}
             />
             <Input
               type="text"
               placeholder="Last Name"
-              name="lastName"
+              name="last_name"
               rules={[{ required: true, message: 'Please input your last name!' }]}
             />
           </Space>
@@ -141,7 +184,7 @@ const CustomerAuthModal = ({ isModalVisible, setIsModalVisible, modalType }) => 
           <Input
             type="password"
             placeholder="Confirm Password"
-            name="confirm"
+            name="confirm_password"
             rules={[
               { required: true, message: 'Please confirm your password!' },
               ({ getFieldValue }) => ({
@@ -176,15 +219,13 @@ const CustomerAuthModal = ({ isModalVisible, setIsModalVisible, modalType }) => 
       footer={null}
       centered
       width={400}
-      style={{ top: 20 }}
-      bodyStyle={{ padding: '20px 40px' }}
+      style={{ top: 20, padding: '20px 40px' }} // Move padding here
     >
       <Form form={form} onFinish={onFinish} layout="vertical" scrollToFirstError>
         {renderFormFields()}
-       
       </Form>
     </Modal>
-  );
+  );  
 };
 
 CustomerAuthModal.propTypes = {
@@ -195,25 +236,3 @@ CustomerAuthModal.propTypes = {
 
 export default CustomerAuthModal;
 
-// Pseudo-code for backend integration
-async function signInUser(values) {
-  // API call to sign in user
-  // Check if user exists and password is correct
-  // Check if user is verified
-  // Return { success: true/false, message: '...' }
-}
-
-async function signUpUser(values) {
-  // API call to sign up user
-  // Create user in database with is_verified set to false and is_google_user set to false
-  // Send verification email
-  message.success('Please check your email to verify your account');
-  // Return { success: true, message: 'Please check your email to verify your account' }
-}
-
-async function signInWithGoogle() {
-  // Implement Google Sign In
-  // Check if user exists in database
-  // If not, create new user with is_google_user set to true and is_verified set to true
-  // Return { success: true/false, message: '...' }
-}

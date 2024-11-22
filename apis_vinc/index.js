@@ -30,7 +30,7 @@ const pool = new Pool({
 });
 
 app.use(cors({
-  origin:  'https://vinc-production-3a9e.up.railway.app', // Frontend URL
+  origin:  'http://localhost:5173', // Frontend URL
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true, // If you need to include cookies

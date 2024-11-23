@@ -18,7 +18,7 @@ const axiosInstance = axios.create({
 // Signup function
 async function signUpUser(values) {
   try {
-    const { data } = await axiosInstance.post('/users', values); // No need for JSON.stringify
+    const { data } = await axiosInstance.post('/api/users', values); // No need for JSON.stringify
     return { success: true, message: data.message };
   } catch (error) {
     console.error('Error signing up:', error);
@@ -35,7 +35,7 @@ async function signUpUser(values) {
 // Signin function
 async function signInUser(values) {
   try {
-    const { data } = await axiosInstance.post('/login', values);
+    const { data } = await axiosInstance.post('/api/login', values);
     return { success: true, message: data.message };
   } catch (error) {
     console.error('Error signing in:', error);

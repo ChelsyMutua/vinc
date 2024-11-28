@@ -11,6 +11,8 @@ import { businessData } from './components/businessData';
 import BusinessListScreen from './components/business-list';
 import SignUpConfirmation from "./components/confirm_screen";
 import BusinessProfileManagement from "./components/business_dash";
+import UserProfile from './components/user-profile';
+import Review from './components/review';
 
 // Wrapper to conditionally render Header
 const AppWithHeader = () => {
@@ -21,7 +23,8 @@ const AppWithHeader = () => {
     '/business/',  // Business profile pages
     '/signup-business' , // Business signup page
     "/signup-confirmation",
-    "/business-dashboard"
+    "/business-dashboard",
+    "/user-profile",
   ];
   
   // Check if current path should hide header
@@ -65,6 +68,8 @@ const AppWithHeader = () => {
         <Route path="/signup-confirmation" element={<SignUpConfirmation />} />
         <Route path="/business-dashboard" element={<BusinessProfileManagement />} />
         <Route path="/business/:businessId" element={<BusinessProfile />} />
+        <Route path="/user-profile" element={<UserProfile />} />
+        <Route path="/review" element={<Review />}/>
       </Routes>
     </>
   );

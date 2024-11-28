@@ -5,9 +5,11 @@ import { RateReview } from "@mui/icons-material";
 import { useEffect } from "react";
 import { businessData } from "./businessData";
 import ProductCard from "./productCard"; // Import the ProductCard component
+import { useNavigate } from "react-router-dom";
 
 const BusinessProfile = () => {
   const { businessId } = useParams();
+  const navigate = useNavigate();
 
   useEffect(() => {
     console.log("BusinessProfile mounted with ID:", businessId);
@@ -71,40 +73,45 @@ const BusinessProfile = () => {
             borderRadius: "24px",
           }}
         >
-          <IconButton>
+          <IconButton onClick={() => navigate("/review")}>
             <RateReview />
           </IconButton>
-          <IconButton>
-            <AccountCircleIcon />
-          </IconButton>
+          <IconButton onClick={() => navigate("/user-profile")}>
+      <AccountCircleIcon />
+    </IconButton>
         </Box>
 
         {/* Logo Section */}
         <Box
-          sx={{
-            position: "absolute",
-            top: "-50px",
-            left: "50%",
-            transform: "translateX(-50%)",
-            backgroundColor: "#fff",
-            borderRadius: "50%",
-            width: "100px",
-            height: "100px",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <img
-            src={business.logo}
-            alt={`${business.name} Logo`}
-            style={{
-              width: "60%",
-              height: "60%",
-              objectFit: "contain",
-            }}
-          />
-        </Box>
+      sx={{
+        position: 'absolute',
+        top: '-50px',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        backgroundColor: '#fff',
+        borderRadius: '50%',
+        // width: '100px',
+        // height: '100px',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        overflow: 'hidden', // Ensures the image is clipped to the box's shape
+        // Responsive sizing example
+        width: { xs: '80px', sm: '100px', md: '120px' },
+        height: { xs: '80px', sm: '100px', md: '120px' },
+      }}
+    >
+      <img
+        src={business.logo || '/assets/Vinciniti_2.png'}
+        alt={`${business.name} official logo`}
+        style={{
+          width: '80%', // Reduced size to create space around the image
+          height: '80%',
+          objectFit: 'contain', // Ensures the entire logo is visible without distortion
+          borderRadius: '50%', // Keeps the image circular
+        }}
+      />
+    </Box>
       </Box>
 
       {/* Business Details */}

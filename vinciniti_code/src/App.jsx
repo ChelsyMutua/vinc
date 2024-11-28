@@ -12,6 +12,7 @@ import BusinessListScreen from './components/business-list';
 import SignUpConfirmation from "./components/confirm_screen";
 import BusinessProfileManagement from "./components/business_dash";
 import UserProfile from './components/user-profile';
+import Review from './components/review';
 
 // Wrapper to conditionally render Header
 const AppWithHeader = () => {
@@ -68,6 +69,7 @@ const AppWithHeader = () => {
         <Route path="/business-dashboard" element={<BusinessProfileManagement />} />
         <Route path="/business/:businessId" element={<BusinessProfile />} />
         <Route path="/user-profile" element={<UserProfile />} />
+        <Route path="/review" element={<Review />}/>
       </Routes>
     </>
   );

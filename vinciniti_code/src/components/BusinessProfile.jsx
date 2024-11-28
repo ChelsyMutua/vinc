@@ -73,7 +73,7 @@ const BusinessProfile = () => {
             borderRadius: "24px",
           }}
         >
-          <IconButton>
+          <IconButton onClick={() => navigate("/review")}>
             <RateReview />
           </IconButton>
           <IconButton onClick={() => navigate("/user-profile")}>

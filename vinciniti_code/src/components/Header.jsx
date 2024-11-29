@@ -1,18 +1,33 @@
-import { AppBar, Toolbar, Button, Box, IconButton, Drawer, List, ListItem, ListItemText, TextField, Autocomplete } from "@mui/material";
+// Header.js
+import {
+  AppBar,
+  Toolbar,
+  Button,
+  Box,
+  IconButton,
+  Drawer,
+  List,
+  ListItem,
+  ListItemText,
+  TextField,
+  Autocomplete,
+} from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import SearchIcon from "@mui/icons-material/Search";
 import { useState } from "react";
-import CustomerAuthModal from './customer-authmodal'; // Import the combined modal
+import CustomerAuthModal from './customer-authmodal';
 import { useNavigate } from 'react-router-dom';
 import { businessData } from './businessData';
+import PropTypes from "prop-types";
 
-function Header() {
+function Header({ hideElements }) {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [isModalVisible, setIsModalVisible] = useState(false); // State to control modal visibility
-  const [modalType, setModalType] = useState('signIn'); // State to control which modal (signIn or signUp) is shown
-  
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [modalType, setModalType] = useState('signIn');
+
   const navigate = useNavigate();
+  // const location = useLocation();
 
   const toggleDrawer = (open) => () => {
     setIsDrawerOpen(open);
@@ -23,7 +38,6 @@ function Header() {
   };
 
   const handleSearchClick = () => {
-    // Navigate to BusinessListScreen with filtered businesses
     const filteredBusinesses = businessData
       .flatMap(category => category.businesses)
       .filter(business =>
@@ -33,19 +47,26 @@ function Header() {
     navigate('/businesses', { state: { businesses: filteredBusinesses, searchQuery } });
   };
 
-  // Extract categories from businessData to be used as suggestions
   const categories = businessData.map(category => category.category);
 
   const showModal = (type) => {
-    setModalType(type); // Set modal type (signIn or signUp)
-    setIsModalVisible(true); // Open the modal
-    setIsDrawerOpen(false); // Close the drawer if open
+    setModalType(type);
+    setIsModalVisible(true);
+    setIsDrawerOpen(false);
   };
 
   return (
     <>
-      <AppBar position="static" sx={{ bgcolor: "#FFF", boxShadow: "0px 0px 0px rgba(0, 0, 0, 0.1)" }}>
-        <Toolbar sx={{ justifyContent: "space-between" }}>
+      <AppBar
+        position="fixed" // Fixed position to overlay content
+        sx={{
+          bgcolor: "#FFF",
+          boxShadow: "none",
+          zIndex: (theme) => theme.zIndex.drawer + 1, // Ensure AppBar is above Drawer
+        }}
+      >
+        <Toolbar sx={{ justifyContent: "space-between", alignItems: "center" }}>
+          {/* Logo */}
           <img
             src="/assets/Vinciniti_2.png"
             alt="Company logo"
@@ -56,143 +77,256 @@ function Header() {
               marginRight: "10px",
             }}
           />
-          {/* Search bar */}
-          <Box sx={{ display: "flex", alignItems: "center", flexGrow: 1, justifyContent: "center" }}>
-            {/* Search Bar */}
-            <Autocomplete
-              freeSolo
-              options={categories}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  variant="outlined"
-                  placeholder="Search all the Categories"
-                  value={searchQuery}
-                  onChange={handleSearchChange}
-                  InputProps={{
-                    ...params.InputProps,
-                    endAdornment: (
-                      <IconButton
-                        color="black"
-                        onClick={handleSearchClick}
-                        edge="end"
-                        sx={{ p: 1.25}}
-                      >
-                        <SearchIcon />
-                      </IconButton>
-                    ),
-                    sx: {
-                      bgcolor: "#F7F6F4",
-                      borderRadius: "8px",
-                      width: {
-                        xs: "100%", // Full width on extra-small screens
-                        sm: "100%", // Full width on small screens
-                        md: "50rem", // Medium width on larger screens
-                        lg: "41.25rem", // Fixed width on large screens
-                      },
-                      maxWidth: "100%", // Prevent the field from exceeding the container width
-                    }          
-                  }}
-                />
-              )}
-            />
-          </Box>
 
-          <Box sx={{ display: "flex", justifyContent: "flex-end", alignItems: "center", gap: 2 }}>
-            <IconButton
-              edge="end"
-              color="inherit"
-              aria-label="menu"
-              sx={{ display: { xs: "flex", md: "none" } }}
-              onClick={toggleDrawer(true)}
-            >
-              <MenuIcon />
-            </IconButton>
-            
-          </Box>
-          {/* Buttons */}
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              gap: 2,
-            }}
-          >
-            <Box
-              sx={{
-                display: { xs: "none", md: "flex" },
-                gap: 2.5,
-              }}
-            >
+          {/* Navigation or Search/Auth */}
+          {hideElements ? (
+            // Navigation Links
+            <Box sx={{ display: "flex", gap: 2 }}>
               <Button
-                variant="outlined"
-                sx={{ bgcolor: "white", color: "black", borderColor: "black" , 
-                  textTransform: "none",  
-                  fontWeight: 'semi-bold',
-                  fontSize: '1rem'}}
-                onClick={() => showModal('signIn')} // Open Sign In modal
-              >
-                Log In
-              </Button>
-              <Button
-                variant="contained"
-                sx={{ backgroundColor: "#ef6b61",
-                  padding: '15px',
-                  marginRight: '10rem',
-                  textTransform: "none",
-                  fontWeight: 'semi-bold',
-                  fontSize: '1rem'
+                onClick={() => navigate('/business-dashboard')}
+                sx={{
+                  color: "black", // Set text color to black
+                  textTransform: "none", // Disable uppercase
+                  fontWeight: "medium",
+                  fontSize: "0.875rem", // Small text size
+                  borderRadius: "4px",
+                  "&:hover": {
+                    backgroundColor: "#f0f0f0",
+                  },
                 }}
-                onClick={() => showModal('signUp')} // Open Sign Up modal
               >
-                Sign Up
+                Business Info
               </Button>
-              <Button variant="outlined" 
-              sx={{ borderColor: "black", 
-              color: "black",
-              textTransform: "none",
-              fontFamily: 'sans-serif'
-             
-              }}
-              onClick={() => navigate('/signup-business')}>
-                Sign Up a business
+              <Button
+                onClick={() => navigate('/review_reply')}
+                sx={{
+                  color: "black",
+                  textTransform: "none",
+                  fontWeight: "medium",
+                  fontSize: "0.875rem",
+                  borderRadius: "4px",
+                  "&:hover": {
+                    backgroundColor: "#f0f0f0",
+                  },
+                }}
+              >
+                Reviews
               </Button>
+              <Button
+                onClick={() => navigate('/photos')}
+                sx={{
+                  color: "black",
+                  textTransform: "none",
+                  fontWeight: "medium",
+                  fontSize: "0.875rem",
+                  borderRadius: "4px",
+                  "&:hover": {
+                    backgroundColor: "#f0f0f0",
+                  },
+                }}
+              >
+                Photos
+              </Button>
+              <Button
+                onClick={() => navigate('/analytics')}
+                sx={{
+                  color: "black",
+                  textTransform: "none",
+                  fontWeight: "medium",
+                  fontSize: "0.875rem",
+                  borderRadius: "4px",
+                  "&:hover": {
+                    backgroundColor: "#f0f0f0",
+                  },
+                }}
+              >
+                Analytics
+              </Button>
+              <Button
+                onClick={() => navigate('/settings')}
+                sx={{
+                  color: "black",
+                  textTransform: "none",
+                  fontWeight: "medium",
+                  fontSize: "0.875rem",
+                  borderRadius: "4px",
+                  "&:hover": {
+                    backgroundColor: "#f0f0f0",
+                  },
+                }}
+              >
+                Settings
+              </Button>
+              {/* Add more links as needed */}
             </Box>
+          ) : (
+            // Search Bar and Auth Buttons
+            <>
+              {/* Search Bar */}
+              <Box sx={{ display: "flex", alignItems: "center", flexGrow: 1, mx: 2 }}>
+                <Autocomplete
+                  freeSolo
+                  options={categories}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      variant="outlined"
+                      placeholder="Search all the Categories"
+                      value={searchQuery}
+                      onChange={handleSearchChange}
+                      InputProps={{
+                        ...params.InputProps,
+                        endAdornment: (
+                          <IconButton onClick={handleSearchClick}>
+                            <SearchIcon />
+                          </IconButton>
+                        ),
+                      }}
+                      sx={{
+                        bgcolor: "#F7F6F4",
+                        borderRadius: "8px",
+                        width: { xs: "100%", md: "50rem" },
+                      }}
+                    />
+                  )}
+                />
+              </Box>
 
-            {/* Hamburger Icon Button for smaller screens */}
-            <IconButton
-              edge="end"
-              color="black"
-              aria-label="menu"
-              sx={{ display: { xs: "flex", md: "none" } }}
-              onClick={toggleDrawer(true)}
-            >
-              <MenuIcon />
-            </IconButton>
+              {/* Auth Buttons */}
+              <Box sx={{ display: "flex", gap: 2 }}>
+                <Button
+                  variant="outlined"
+                  sx={{
+                    bgcolor: "white",
+                    color: "black",
+                    borderColor: "black",
+                    textTransform: "none",
+                    fontWeight: 'medium',
+                    fontSize: '0.875rem', // Small text
+                    borderRadius: '8px',
+                    '&:hover': {
+                      backgroundColor: "#f0f0f0",
+                    },
+                  }}
+                  onClick={() => showModal('signIn')}
+                >
+                  Log In
+                </Button>
+                
+                <Button
+                  variant="contained"
+                  sx={{
+                    backgroundColor: "#FE6F61", // Updated background color
+                    color: "black", // Text color
+                    textTransform: "none", // No uppercase
+                    fontSize: "0.875rem", // Small text
+                    padding: '8px 16px', // Adjusted padding
+                    fontWeight: 'medium',
+                    borderRadius: '8px',
+                    '&:hover': {
+                      backgroundColor: "#E65C54", // Darker shade on hover
+                    },
+                  }}
+                  onClick={() => showModal('signUp')}
+                >
+                  Sign Up
+                </Button>
+                
+                <Button 
+                  variant="outlined" 
+                  sx={{ 
+                    borderColor: "black", 
+                    color: "black",
+                    textTransform: "none",
+                    fontFamily: 'sans-serif',
+                    fontSize: '0.875rem', // Small text
+                    borderRadius: '8px',
+                    '&:hover': {
+                      backgroundColor: "#f0f0f0",
+                    },
+                  }}
+                  onClick={() => navigate('/signup-business')}
+                >
+                  Sign Up a business
+                </Button>
+              </Box>
 
-            {/* Drawer (Hamburger Menu) */}
-            <Drawer anchor="right" open={isDrawerOpen} onClose={toggleDrawer(false)}>
-              <List sx={{ width: 250 }}>
-                <ListItem button onClick={() => showModal('signIn')}> {/* Close drawer and trigger modal */}
-                  <ListItemText primary="Log in" />
-                </ListItem>
-                <ListItem button onClick={() => showModal('signUp')}>
-                  <ListItemText primary="Sign Up" />
-                </ListItem>
-                <ListItem button onClick={toggleDrawer(false)}>
-                  <ListItemText primary="Add a business" />
-                </ListItem>
-              </List>
-            </Drawer>
-          </Box>
+              {/* Hamburger Menu for Mobile */}
+              <IconButton
+                edge="end"
+                color="inherit"
+                aria-label="menu"
+                sx={{ display: { xs: "flex", md: "none" } }}
+                onClick={toggleDrawer(true)}
+              >
+                <MenuIcon />
+              </IconButton>
+            </>
+          )}
         </Toolbar>
       </AppBar>
 
-      {/* Pass modal visibility state and modal type to CustomerAuthModal */}
-      <CustomerAuthModal isModalVisible={isModalVisible} setIsModalVisible={setIsModalVisible} modalType={modalType} />
+      {/* Drawer for Mobile Menu */}
+      {!hideElements && (
+        <Drawer
+          anchor="right"
+          open={isDrawerOpen}
+          onClose={toggleDrawer(false)}
+          PaperProps={{
+            sx: {
+              backgroundColor: '#FE6F61', // Desired Drawer background color
+              color: '#000', // Text color inside Drawer
+            },
+          }}
+        >
+          <List sx={{ width: 250 }}>
+            <ListItem button onClick={() => { showModal('signIn'); toggleDrawer(false)(); }}>
+              <ListItemText 
+                primary="Log in" 
+                sx={{ 
+                  color: '#000', // Ensure text is black
+                  fontSize: '0.875rem', 
+                  textTransform: 'none', 
+                }} 
+              />
+            </ListItem>
+            <ListItem button onClick={() => { showModal('signUp'); toggleDrawer(false)(); }}>
+              <ListItemText 
+                primary="Sign Up" 
+                sx={{ 
+                  color: '#000', 
+                  fontSize: '0.875rem', 
+                  textTransform: 'none', 
+                }} 
+              />
+            </ListItem>
+            <ListItem button onClick={() => { navigate('/signup-business'); toggleDrawer(false)(); }}>
+              <ListItemText 
+                primary="Sign Up a business" 
+                sx={{ 
+                  color: '#000', 
+                  fontSize: '0.875rem', 
+                  textTransform: 'none', 
+                }} 
+              />
+            </ListItem>
+          </List>
+        </Drawer>
+      )}
+
+      {/* Modal */}
+      <CustomerAuthModal
+        isModalVisible={isModalVisible}
+        setIsModalVisible={setIsModalVisible}
+        modalType={modalType}
+      />
     </>
   );
 }
+
+Header.propTypes = {
+  hideElements: PropTypes.bool, // `hideElements` is expected to be a boolean
+};
+
 
 export default Header;

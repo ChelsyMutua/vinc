@@ -661,6 +661,139 @@ router.put('/businesses/info/edit', async (req, res) => {
 });
 
 
+// Fetch business working hours
+router.get('/businesses/hours', async (req, res) => {
+  try {
+    // Check if the user is logged in
+    if (!req.session.userId) {
+      return res.status(401).json({ message: 'Unauthorized: Please log in' });
+    }
+
+    // Retrieve the logged-in user's details
+    const userResult = await pool.query('SELECT * FROM users WHERE user_id = $1', [req.session.userId]);
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const user = userResult.rows[0];
+
+    // Check if the user is a business_owner
+    if (user.role !== 'business_owner') {
+      return res.status(403).json({ message: 'Access denied: User is not a business owner' });
+    }
+
+    // Retrieve the business associated with the user
+    const businessResult = await pool.query(
+      `SELECT business_id 
+       FROM businesses 
+       WHERE owner_id = $1`,
+      [user.user_id]
+    );
+
+    if (businessResult.rows.length === 0) {
+      return res.status(404).json({ message: 'Business not found' });
+    }
+
+    const businessId = businessResult.rows[0].business_id;
+
+    // Retrieve working hours for the business
+    const result = await pool.query(
+      `SELECT day_of_week, opening_time, closing_time, is_closed 
+       FROM working_hours 
+       WHERE business_id = $1
+       ORDER BY 
+         CASE 
+           WHEN day_of_week = 'Monday' THEN 1
+           WHEN day_of_week = 'Tuesday' THEN 2
+           WHEN day_of_week = 'Wednesday' THEN 3
+           WHEN day_of_week = 'Thursday' THEN 4
+           WHEN day_of_week = 'Friday' THEN 5
+           WHEN day_of_week = 'Saturday' THEN 6
+           WHEN day_of_week = 'Sunday' THEN 7
+         END`,
+      [businessId]
+    );
+
+    // If no working hours are set, return an empty array
+    res.json(result.rows.length > 0 ? result.rows : []);
+  } catch (error) {
+    console.error('Error fetching business working hours:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
+
+
+// Update business working hours
+// Update business working hours with simplified structure
+router.put('/businesses/hours/edit', async (req, res) => {
+  const { hours } = req.body; // Array of { days, opening_time, closing_time, is_closed }
+
+  if (!hours || !Array.isArray(hours)) {
+    return res.status(400).json({ message: 'Invalid working hours data' });
+  }
+
+  try {
+    // Check if the user is logged in
+    if (!req.session.userId) {
+      return res.status(401).json({ message: 'Unauthorized: Please log in' });
+    }
+
+    // Retrieve the logged-in user's details
+    const userResult = await pool.query('SELECT * FROM users WHERE user_id = $1', [req.session.userId]);
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const user = userResult.rows[0];
+
+    // Check if the user is a business_owner
+    if (user.role !== 'business_owner') {
+      return res.status(403).json({ message: 'Access denied: User is not a business owner' });
+    }
+
+    // Retrieve the business associated with the user
+    const businessResult = await pool.query(
+      `SELECT business_id 
+       FROM businesses 
+       WHERE owner_id = $1`,
+      [user.user_id]
+    );
+
+    if (businessResult.rows.length === 0) {
+      return res.status(404).json({ message: 'Business not found' });
+    }
+
+    const businessId = businessResult.rows[0].business_id;
+
+    // Delete existing working hours for the business
+    await pool.query('DELETE FROM working_hours WHERE business_id = $1', [businessId]);
+
+    // Insert new working hours
+    const inserts = [];
+    for (const entry of hours) {
+      const { days, opening_time, closing_time, is_closed } = entry;
+      for (const day of days) {
+        inserts.push(
+          `(${businessId}, '${day}', ${opening_time ? `'${opening_time}'` : 'NULL'}, ${closing_time ? `'${closing_time}'` : 'NULL'}, ${is_closed})`
+        );
+      }
+    }
+
+    if (inserts.length > 0) {
+      await pool.query(
+        `INSERT INTO working_hours (business_id, day_of_week, opening_time, closing_time, is_closed) VALUES ${inserts.join(', ')}`
+      );
+    }
+
+    res.json({ message: 'Working hours updated successfully' });
+  } catch (error) {
+    console.error('Error updating business working hours:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
+
+
+
 // Define the server port
 const PORT = process.env.PORT || 3000;
 

@@ -504,7 +504,161 @@ router.post('/businesses/transition', async (req, res) => {
   }
 });
 
+// Fetch business info
+router.get('/businesses/info', async (req, res) => {
+  try {
+    // Check if the user is logged in
+    if (!req.session.userId) {
+      return res.status(401).json({ message: 'Unauthorized: Please log in' });
+    }
 
+    // Retrieve the logged-in user's details
+    const userResult = await pool.query('SELECT * FROM users WHERE user_id = $1', [req.session.userId]);
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const user = userResult.rows[0];
+
+    // Check if the user is a business_owner
+    if (user.role !== 'business_owner') {
+      return res.status(403).json({ message: 'Access denied: User is not a business owner' });
+    }
+
+    // Retrieve the business associated with the user
+    const businessResult = await pool.query(
+      `SELECT b.business_id, b.business_name, b.address, b.phone_number 
+       FROM businesses b
+       WHERE b.owner_id = $1`,
+      [user.user_id]
+    );
+
+    if (businessResult.rows.length === 0) {
+      return res.status(404).json({ message: 'Business not found' });
+    }
+
+    const business = businessResult.rows[0];
+
+    // Retrieve the categories associated with the business
+    const categoriesResult = await pool.query(
+      `SELECT c.category_id, c.name
+       FROM business_categories bc
+       INNER JOIN categories c ON bc.category_id = c.category_id
+       WHERE bc.business_id = $1`,
+      [business.business_id]
+    );
+
+    res.json({
+      business_id: business.business_id,
+      business_name: business.business_name,
+      address: business.address,
+      phone_number: business.phone_number,
+      categories: categoriesResult.rows.length ? categoriesResult.rows : [], // Return empty array if no categories
+    });
+  } catch (error) {
+    console.error('Error fetching business info:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
+
+// Fetch all categories
+router.get('/categories', async (req, res) => {
+  try {
+    const categoriesResult = await pool.query('SELECT category_id, name FROM categories ORDER BY name ASC');
+    res.json(categoriesResult.rows);
+  } catch (error) {
+    console.error('Error fetching categories:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
+
+
+router.put('/businesses/info/edit', async (req, res) => {
+  const { business_name, address, phone_number, categories } = req.body;
+
+  try {
+    // Check if the user is logged in
+    if (!req.session.userId) {
+      return res.status(401).json({ message: 'Unauthorized: Please log in' });
+    }
+
+    // Retrieve the logged-in user's details
+    const userResult = await pool.query('SELECT * FROM users WHERE user_id = $1', [req.session.userId]);
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const user = userResult.rows[0];
+
+    // Check if the user is a business_owner
+    if (user.role !== 'business_owner') {
+      return res.status(403).json({ message: 'Access denied: User is not a business owner' });
+    }
+
+    // Retrieve the business associated with the user
+    const businessResult = await pool.query(
+      `SELECT business_id 
+       FROM businesses 
+       WHERE owner_id = $1`,
+      [user.user_id]
+    );
+
+    if (businessResult.rows.length === 0) {
+      return res.status(404).json({ message: 'Business not found' });
+    }
+
+    const businessId = businessResult.rows[0].business_id;
+
+    // Update fields dynamically
+    const updateFields = [];
+    const updateValues = [];
+    if (business_name) {
+      updateFields.push('business_name = $' + (updateFields.length + 1));
+      updateValues.push(business_name);
+    }
+    if (address) {
+      updateFields.push('address = $' + (updateFields.length + 1));
+      updateValues.push(address);
+    }
+    if (phone_number) {
+      updateFields.push('phone_number = $' + (updateFields.length + 1));
+      updateValues.push(phone_number);
+    }
+
+    if (updateFields.length > 0) {
+      updateValues.push(businessId); // Add business_id to the end for the WHERE clause
+      await pool.query(
+        `UPDATE businesses 
+         SET ${updateFields.join(', ')}, updated_at = NOW() 
+         WHERE business_id = $${updateValues.length}`,
+        updateValues
+      );
+    }
+
+    // Update categories if provided
+    if (categories) {
+      // Resolve category names to IDs
+      const categoryResult = await pool.query(
+        `SELECT category_id FROM categories WHERE name = ANY($1)`,
+        [categories]
+      );
+
+      const categoryIds = categoryResult.rows.map((row) => row.category_id);
+
+      // Clear existing categories and insert new ones
+      await pool.query('DELETE FROM business_categories WHERE business_id = $1', [businessId]);
+      if (categoryIds.length > 0) {
+        const categoryInserts = categoryIds.map((categoryId) => `(${businessId}, ${categoryId})`).join(',');
+        await pool.query(`INSERT INTO business_categories (business_id, category_id) VALUES ${categoryInserts}`);
+      }
+    }
+
+    res.json({ message: 'Business info updated successfully' });
+  } catch (error) {
+    console.error('Error updating business info:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
 
 
 // Define the server port

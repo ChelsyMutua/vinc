@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Form, Input, Select, Button, Layout, Typography, Space } from "antd";
 import { useNavigate } from "react-router-dom"; // Import useNavigate
@@ -9,13 +10,35 @@ import MapLocation from './map_location';
 
 
 
-
 const { Content } = Layout;
 const { Title } = Typography;
-const { Option } = Select;
+
+
+const API_BASE_URL = 'https://vinc-production-3a9e.up.railway.app'; // Backend base URL
+
+const axiosInstance = axios.create({
+  baseURL: API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  withCredentials: true, // Include cookies for authentication if needed
+});
+
+// Function to submit business profile
+export async function submitBusinessProfile(values) {
+  try {
+    const { data } = await axiosInstance.post('api/businesses/profile', values);
+    return { success: true, message: data.message, business: data.business };
+  } catch (error) {
+    const errorMessage =
+      error.response?.data?.message || 'Failed to create business profile. Please try again.';
+    return { success: false, message: errorMessage };
+  }
+}
 
 export default function BusinessSignUp() {
   const [form] = Form.useForm();
+
   const navigate = useNavigate(); // To navigate to the confirmation screen
     // State for business locations
     const [businessLocations, setBusinessLocations] = useState([]);
@@ -113,6 +136,41 @@ const onFinish = async (values) => {
 
 const categories = businessData.map((category) => category.category);
 
+  const navigate = useNavigate();
+
+  const onFinish = async (values) => {
+    const hideLoading = message.loading("Submitting your profile...", 0);
+    try {
+      const response = await submitBusinessProfile({
+        first_name: values.firstName,
+        last_name: values.lastName,
+        email: values.email,
+        password: values.password,
+        confirm_password: values.confirm,
+        business_name: values.businessName,
+        phone_number: values.phoneNumber,
+        address: values.address,
+        city: values.city,
+        postal_code: values.postalCode,
+        app_suite: values.aptSuite || '', // Optional field
+      });
+  
+      if (response.success) {
+        hideLoading(); // Hide loading spinner
+        message.success(response.message);
+        navigate('/signup-confirmation'); // Redirect to confirmation page
+      } else {
+        hideLoading();
+        message.error(response.message);
+      }
+    } catch (error) {
+      hideLoading();
+      message.error("Something went wrong. Please try again.");
+    }
+  };
+  
+
+
   return (
     <Layout style={{ minHeight: '100vh', backgroundColor: 'white' }}>
       <Content style={{ display: "flex" }}>
@@ -131,6 +189,7 @@ const categories = businessData.map((category) => category.category);
             layout="vertical"
             scrollToFirstError
           >
+            {/* Form fields here */}
             <Form.Item
               name="businessName"
               label="Business Name"
@@ -145,20 +204,6 @@ const categories = businessData.map((category) => category.category);
               rules={[{ required: true, message: "Please input your phone number!" }]}
             >
               <Input prefix={<PhoneOutlined />} />
-            </Form.Item>
-
-            <Form.Item
-              name="category"
-              label="Category"
-              rules={[{ required: true, message: "Please select a category!" }]}
-            >
-              <Select placeholder="Select a category">
-                {categories.map((category, index) => (
-                  <Option key={index} value={category}>
-                    {category}
-                  </Option>
-                ))}
-              </Select>
             </Form.Item>
 
             <Form.Item
@@ -220,36 +265,37 @@ const categories = businessData.map((category) => category.category);
             >
               <Input prefix={<MailOutlined />} placeholder="Email" />
             </Form.Item>
-            <Form.Item 
-            name="password"
-            rules={[{ required: true, message: 'Please input your password!' }]}>  
-            <Input placeholder="Password" type="password" />
-          </Form.Item>
-              <Form.Item
+
+            <Form.Item
+              name="password"
+              rules={[{ required: true, message: "Please input your password!" }]}
+            >
+              <Input placeholder="Password" type="password" />
+            </Form.Item>
+
+            <Form.Item
               name="confirm"
               rules={[
-                { required: true, message: 'Please confirm your password!' },
+                { required: true, message: "Please confirm your password!" },
                 ({ getFieldValue }) => ({
                   validator(_, value) {
-                    if (!value || getFieldValue('password') === value) {
+                    if (!value || getFieldValue("password") === value) {
                       return Promise.resolve();
                     }
-                    return Promise.reject(new Error('The two passwords that you entered do not match!'));
+                    return Promise.reject(new Error("The two passwords that you entered do not match!"));
                   },
                 }),
-              ]}>
- <Input
-            type="password"
-            placeholder="Confirm Password"
-            
-          />
-
-              </Form.Item>
-         
-          
+              ]}
+            >
+              <Input type="password" placeholder="Confirm Password" />
+            </Form.Item>
 
             <Form.Item>
-              <Button type="primary" htmlType="submit" style={{ backgroundColor: "#FE6F61", borderColor: "#FE6F61" }}>
+              <Button
+                type="primary"
+                htmlType="submit"
+                style={{ backgroundColor: "#FE6F61", borderColor: "#FE6F61" }}
+              >
                 Sign Up
               </Button>
             </Form.Item>

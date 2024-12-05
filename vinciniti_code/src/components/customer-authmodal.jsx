@@ -2,36 +2,49 @@ import React from 'react';
 import { Form, Button, Modal, Space, message } from 'antd';
 import Input from './auth-inputs';
 import PropTypes from 'prop-types';
+import axios from 'axios';
 
-const GoogleSignInButton = ({ onClick }) => (
-  <Button 
-    onClick={onClick}
-    style={{ 
-      width: '100%', 
-      backgroundColor: 'white', 
-      borderColor: '#ccc', 
-      color: '#757575',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center'
-    }}
-  >
-    <img 
-      src="/assets/search.png" 
-      alt="Google" 
-      style={{ 
-        width: '18px', 
-        height: '18px', 
-        marginRight: '8px'
-      }} 
-    />
-    Sign in with Google
-  </Button>
-);
+const API_BASE_URL = 'https://vinc-production-3a9e.up.railway.app';
 
-GoogleSignInButton.propTypes = {
-  onClick: PropTypes.func.isRequired,
-};
+// Axios instance (optional but recommended for reusability)
+const axiosInstance = axios.create({
+  baseURL: API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  withCredentials: true, // If you need to include cookies
+});
+
+// Signup function
+async function signUpUser(values) {
+  try {
+    const { data } = await axiosInstance.post('/api/users', values); // No need for JSON.stringify
+    return { success: true, message: data.message };
+  } catch (error) {
+    console.error('Error signing up:', error);
+
+    // Extract error message from response if available
+    const errorMessage =
+      error.response?.data?.message || 'Failed to sign up. Please try again.';
+      console.log(errorMessage);
+    return { success: false, message: errorMessage };
+  
+  }
+}
+
+// Signin function
+async function signInUser(values) {
+  try {
+    const { data } = await axiosInstance.post('/api/login', values);
+    return { success: true, message: data.message };
+  } catch (error) {
+    console.error('Error signing in:', error);
+
+    const errorMessage =
+      error.response?.data?.message || 'Failed to sign in. Please try again.';
+    return { success: false, message: errorMessage };
+  }
+}
 
 const CustomerAuthModal = ({ isModalVisible, setIsModalVisible, modalType }) => {
   const [form] = Form.useForm();
@@ -54,7 +67,7 @@ const CustomerAuthModal = ({ isModalVisible, setIsModalVisible, modalType }) => 
       if (response.success) {
         message.success(response.message);
         setIsModalVisible(false);
-        // Handle successful authentication (e.g., update app state, redirect)
+        // Optionally, fetch user profile or redirect
       } else {
         message.error(response.message);
       }
@@ -66,10 +79,7 @@ const CustomerAuthModal = ({ isModalVisible, setIsModalVisible, modalType }) => 
     }
   };
 
-
-
   const handleForgotPassword = () => {
-    // Implement forgot password logic here
     console.log('Forgot Password clicked');
   };
 
@@ -83,7 +93,7 @@ const CustomerAuthModal = ({ isModalVisible, setIsModalVisible, modalType }) => 
             name="email"
             rules={[
               { type: 'email', message: 'The input is not a valid E-mail!' },
-              { required: true, message: 'Please input your E-mail!' }
+              { required: true, message: 'Please input your E-mail!' },
             ]}
           />
           <Input
@@ -95,7 +105,12 @@ const CustomerAuthModal = ({ isModalVisible, setIsModalVisible, modalType }) => 
           <Form.Item>
             <Button
               htmlType="submit"
-              style={{ width: '100%', backgroundColor: '#FE6F61', borderColor: '#FE6F61', color: 'white' }}
+              style={{
+                width: '100%',
+                backgroundColor: '#FE6F61',
+                borderColor: '#FE6F61',
+                color: 'white',
+              }}
               loading={loading}
             >
               Sign In
@@ -113,13 +128,13 @@ const CustomerAuthModal = ({ isModalVisible, setIsModalVisible, modalType }) => 
             <Input
               type="text"
               placeholder="First Name"
-              name="firstName"
+              name="first_name"
               rules={[{ required: true, message: 'Please input your first name!' }]}
             />
             <Input
               type="text"
               placeholder="Last Name"
-              name="lastName"
+              name="last_name"
               rules={[{ required: true, message: 'Please input your last name!' }]}
             />
           </Space>
@@ -129,8 +144,14 @@ const CustomerAuthModal = ({ isModalVisible, setIsModalVisible, modalType }) => 
             name="email"
             rules={[
               { type: 'email', message: 'The input is not a valid E-mail!' },
-              { required: true, message: 'Please input your E-mail!' }
+              { required: true, message: 'Please input your E-mail!' },
             ]}
+          />
+          <Input
+            type="text"
+            placeholder="Phone Number"
+            name="phone_number"
+            rules={[{ required: false }]}
           />
           <Input
             type="password"
@@ -141,7 +162,7 @@ const CustomerAuthModal = ({ isModalVisible, setIsModalVisible, modalType }) => 
           <Input
             type="password"
             placeholder="Confirm Password"
-            name="confirm"
+            name="confirm_password"
             rules={[
               { required: true, message: 'Please confirm your password!' },
               ({ getFieldValue }) => ({
@@ -149,7 +170,9 @@ const CustomerAuthModal = ({ isModalVisible, setIsModalVisible, modalType }) => 
                   if (!value || getFieldValue('password') === value) {
                     return Promise.resolve();
                   }
-                  return Promise.reject(new Error('The two passwords that you entered do not match!'));
+                  return Promise.reject(
+                    new Error('The two passwords that you entered do not match!')
+                  );
                 },
               }),
             ]}
@@ -157,7 +180,12 @@ const CustomerAuthModal = ({ isModalVisible, setIsModalVisible, modalType }) => 
           <Form.Item>
             <Button
               htmlType="submit"
-              style={{ width: '100%', backgroundColor: '#FE6F61', borderColor: '#FE6F61', color: 'white' }}
+              style={{
+                width: '100%',
+                backgroundColor: '#FE6F61',
+                borderColor: '#FE6F61',
+                color: 'white',
+              }}
               loading={loading}
             >
               Sign Up
@@ -176,12 +204,10 @@ const CustomerAuthModal = ({ isModalVisible, setIsModalVisible, modalType }) => 
       footer={null}
       centered
       width={400}
-      style={{ top: 20 }}
-      bodyStyle={{ padding: '20px 40px' }}
+      style={{ top: 20, padding: '20px 40px' }} // Move padding here
     >
       <Form form={form} onFinish={onFinish} layout="vertical" scrollToFirstError>
         {renderFormFields()}
-       
       </Form>
     </Modal>
   );
@@ -194,26 +220,3 @@ CustomerAuthModal.propTypes = {
 };
 
 export default CustomerAuthModal;
-
-// Pseudo-code for backend integration
-async function signInUser(values) {
-  // API call to sign in user
-  // Check if user exists and password is correct
-  // Check if user is verified
-  // Return { success: true/false, message: '...' }
-}
-
-async function signUpUser(values) {
-  // API call to sign up user
-  // Create user in database with is_verified set to false and is_google_user set to false
-  // Send verification email
-  message.success('Please check your email to verify your account');
-  // Return { success: true, message: 'Please check your email to verify your account' }
-}
-
-async function signInWithGoogle() {
-  // Implement Google Sign In
-  // Check if user exists in database
-  // If not, create new user with is_google_user set to true and is_verified set to true
-  // Return { success: true/false, message: '...' }
-}

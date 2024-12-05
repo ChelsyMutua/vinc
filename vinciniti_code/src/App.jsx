@@ -1,3 +1,4 @@
+// App.jsx
 import { BrowserRouter as Router, Route, Routes, useLocation } from "react-router-dom";
 import Header from './components/Header';
 import Hero from './components/Hero';
@@ -13,29 +14,57 @@ import SignUpConfirmation from "./components/confirm_screen";
 import BusinessProfileManagement from "./components/business_dash";
 import UserProfile from './components/user-profile';
 import Review from './components/review';
+import ReviewReply from "./components/review_reply";
+import Photos from "./components/photos";
+import Analytics from './components/analytics'; 
+// import Settings from './components/settings'; // Assuming you have a Settings component
 
-// Wrapper to conditionally render Header
 const AppWithHeader = () => {
   const location = useLocation();
   
-  // List of paths where header should not appear
+  // Paths where the entire Header should be hidden
   const noHeaderPaths = [
-    '/business/',  // Business profile pages
-    '/signup-business' , // Business signup page
-    "/signup-confirmation",
-    "/business-dashboard",
-    "/user-profile",
+    '/business/:businessId',  // Business profile pages with dynamic ID
+    '/signup-business',       // Business signup page
+    '/signup-confirmation',
+    // Add more paths if needed
   ];
   
-  // Check if current path should hide header
-  const shouldHideHeader = noHeaderPaths.some(path => 
-    location.pathname.startsWith(path)
-  );
+  // Paths where specific Header elements should be hidden
+  const hideHeaderElementsPaths = [
+    '/user-profile',
+    '/review_reply',
+    '/business-dashboard',
+    '/photos',
+    '/analytics',
+    '/settings'
+
+    // Add more paths if needed
+  ];
+  
+  // Function to check if current path matches any pattern in the array
+  const pathMatches = (paths, pathname) => {
+    return paths.some(path => {
+      if (path.includes(':')) {
+        // Handle dynamic routes like /business/:businessId
+        const basePath = path.split('/:')[0];
+        return pathname.startsWith(basePath + '/');
+      }
+      return pathname === path;
+    });
+  };
+
+  // Determine if the Header should be hidden entirely
+  const shouldHideHeader = pathMatches(noHeaderPaths, location.pathname);
+
+  // Determine if specific Header elements should be hidden
+  const shouldHideHeaderElements = pathMatches(hideHeaderElementsPaths, location.pathname);
 
   return (
     <>
-      {/* Only render the Header if not on excluded pages */}
-      {!shouldHideHeader && <Header />}
+      {/* Conditionally render Header based on the current path */}
+      {!shouldHideHeader && <Header hideElements={shouldHideHeaderElements} />}
+      
       <Routes>
         <Route
           path="/"
@@ -70,6 +99,11 @@ const AppWithHeader = () => {
         <Route path="/business/:businessId" element={<BusinessProfile />} />
         <Route path="/user-profile" element={<UserProfile />} />
         <Route path="/review" element={<Review />}/>
+        <Route path="/review_reply" element={<ReviewReply />} />
+        <Route path="/photos" element={<Photos />} />
+        <Route path="/analytics" element={<Analytics />} />
+        {/* <Route path="/settings" element={<Settings />} /> */}
+        {/* Add more routes as needed */}
       </Routes>
     </>
   );

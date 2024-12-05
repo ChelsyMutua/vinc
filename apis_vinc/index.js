@@ -402,7 +402,8 @@ router.post('/logout', (req, res) => {
 });
 
 // first part business profile 
-router.post('/businesses/profile', async (req, res) => {
+// Business transition
+router.post('/businesses/transition', async (req, res) => {
   const {
     first_name,
     last_name,
@@ -410,7 +411,7 @@ router.post('/businesses/profile', async (req, res) => {
     password,
     confirm_password,
     business_name,
-    phone_number,
+    business_phone_number,
     address,
     city,
     postal_code,
@@ -418,13 +419,8 @@ router.post('/businesses/profile', async (req, res) => {
   } = req.body;
 
   // Validate mandatory fields for both cases
-  if (!business_name || !phone_number || !address || !city || !postal_code) {
-    return res.status(400).json({ message: 'Business name, phone number, address, city, and postal code are required' });
-  }
-
-  // Check if passwords match
-  if (password && password !== confirm_password) {
-    return res.status(400).json({ message: 'Passwords do not match' });
+  if (!business_name || !business_phone_number || !address || !city || !postal_code || !confirm_password) {
+    return res.status(400).json({ message: 'Business name, phone number, address, city, postal code, and confirm password are required' });
   }
 
   try {
@@ -434,7 +430,7 @@ router.post('/businesses/profile', async (req, res) => {
       // For existing users
       userId = req.session.userId;
 
-      // Retrieve user details
+      // Retrieve the logged-in user's details
       const userResult = await pool.query('SELECT * FROM users WHERE user_id = $1', [userId]);
       if (userResult.rows.length === 0) {
         return res.status(404).json({ message: 'User not found' });
@@ -442,20 +438,24 @@ router.post('/businesses/profile', async (req, res) => {
 
       const user = userResult.rows[0];
 
-      // Validate password confirmation for existing users
-      const isValidPassword = await bcrypt.compare(password, user.password_hash);
+      // Validate password confirmation
+      const isValidPassword = await bcrypt.compare(confirm_password, user.password_hash);
       if (!isValidPassword) {
         return res.status(401).json({ message: 'Invalid password confirmation' });
       }
 
-      // Update user role to 'business_owner' if not already set
+      // Update the user's role to 'business_owner' if not already set
       if (user.role !== 'business_owner') {
-        await pool.query('UPDATE users SET role = $1 WHERE user_id = $2', ['business_owner', userId]);
+        await pool.query('UPDATE users SET role = $1 WHERE user_id = $2', ['business_owner', user.user_id]);
       }
     } else {
       // For new users
       if (!first_name || !last_name || !email || !password) {
-        return res.status(400).json({ message: 'First name, last name, email, and password are required for signup' });
+        return res.status(400).json({ message: 'First name, last name, email, and password are required for new user signup' });
+      }
+
+      if (password !== confirm_password) {
+        return res.status(400).json({ message: 'Passwords do not match' });
       }
 
       // Check if email already exists
@@ -470,10 +470,10 @@ router.post('/businesses/profile', async (req, res) => {
 
       // Create new user as 'business_owner'
       const userResult = await pool.query(
-        `INSERT INTO users (first_name, last_name, email, password_hash, role) 
-         VALUES ($1, $2, $3, $4, $5) 
+        `INSERT INTO users (first_name, last_name, email, password_hash, role, phone_number) 
+         VALUES ($1, $2, $3, $4, $5, $6) 
          RETURNING user_id`,
-        [first_name, last_name, email, password_hash, 'business_owner']
+        [first_name, last_name, email, password_hash, 'business_owner', business_phone_number]
       );
       userId = userResult.rows[0].user_id;
     }
@@ -491,7 +491,7 @@ router.post('/businesses/profile', async (req, res) => {
        ) 
        VALUES ($1, $2, $3, $4, $5, $6, $7) 
        RETURNING business_id, business_name, phone_number, address, city, postal_code, app_suite`,
-      [userId, business_name, phone_number, address, city, postal_code, app_suite]
+      [userId, business_name, business_phone_number, address, city, postal_code, app_suite || null]
     );
 
     res.status(201).json({
@@ -499,10 +499,12 @@ router.post('/businesses/profile', async (req, res) => {
       business: businessResult.rows[0],
     });
   } catch (error) {
-    console.error('Error creating business profile:', error);
+    console.error('Error during business transition:', error);
     res.status(500).json({ message: 'Internal Server Error' });
   }
 });
+
+
 
 
 // Define the server port

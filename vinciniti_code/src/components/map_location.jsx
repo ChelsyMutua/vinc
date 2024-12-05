@@ -1,16 +1,54 @@
-import { useState } from "react";
-import { GoogleMap, useLoadScript, Marker } from "@react-google-maps/api";
+import { useState, useEffect } from "react";
+import { GoogleMap, useLoadScript, Marker, InfoWindow } from "@react-google-maps/api";
 import { Box, Typography } from "@mui/material";
+import axios from "axios";
 
 const MapLocation = () => {
+
   const { isLoaded } = useLoadScript({
-    googleMapsApiKey: "AIzaSyD_FPcoZL50S8WeYvrpGc452rDYadVRkuQ", // Replace with your API Key
+    googleMapsApiKey: 'AIzaSyC7mpT_fQp9RirAqW3uA-8kXVJ_zSfSXCI'// Ensure this environment variable is set
   });
 
-  const [markerPosition, setMarkerPosition] = useState({
-    lat: 37.7749, // Default latitude (San Francisco)
-    lng: -122.4194, // Default longitude (San Francisco)
-  });
+  const [markerPosition, setMarkerPosition] = useState(null);
+  const [streetData, setStreetData] = useState([]);
+  const [selectedStreet, setSelectedStreet] = useState(null);
+
+  useEffect(() => {
+    // Fetch user's location
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setMarkerPosition({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          });
+        },
+        () => {
+          // Handle location access denied or error
+          setMarkerPosition({
+            lat: 37.7749, // Default latitude
+            lng: -122.4194, // Default longitude
+          });
+        }
+      );
+    } else {
+      // Browser doesn't support Geolocation
+      setMarkerPosition({
+        lat: 37.7749, // Default latitude
+        lng: -122.4194, // Default longitude
+      });
+    }
+
+    // Fetch street data from backend
+    axios.get('/api/streets')
+      .then(response => {
+        console.log('Street data:', response.data);
+        setStreetData(response.data);
+      })
+      .catch(error => {
+        console.error('Error fetching street data:', error);
+      });
+  }, []);
 
   const handleMapClick = (event) => {
     setMarkerPosition({
@@ -19,7 +57,7 @@ const MapLocation = () => {
     });
   };
 
-  if (!isLoaded) return <div>Loading Map...</div>;
+  if (!isLoaded || !markerPosition) return <div>Loading Map...</div>;
 
   return (
     <Box>
@@ -35,9 +73,28 @@ const MapLocation = () => {
         }}
         center={markerPosition}
         zoom={12}
-        onClick={handleMapClick} // Updates the marker when the map is clicked
+        onClick={handleMapClick}
       >
         <Marker position={markerPosition} />
+        {Array.isArray(streetData) && streetData.map((item) => (
+          <Marker
+            key={item.said}
+            position={{ lat: item.latitude, lng: item.longitude }}
+            title={item.srtext}
+            onClick={() => setSelectedStreet(item)}
+          />
+        ))}
+        {selectedStreet && (
+          <InfoWindow
+            position={{ lat: selectedStreet.latitude, lng: selectedStreet.longitude }}
+            onCloseClick={() => setSelectedStreet(null)}
+          >
+            <div>
+              <h2>{selectedStreet.srtext}</h2>
+              {/* Add more details if necessary */}
+            </div>
+          </InfoWindow>
+        )}
       </GoogleMap>
       <Box sx={{ marginTop: "10px" }}>
         <Typography variant="body2">

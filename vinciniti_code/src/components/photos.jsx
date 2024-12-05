@@ -1,22 +1,29 @@
-import React, { useState } from "react";
-import { Box, Typography, Button, TextField, Divider, IconButton, Grid } from "@mui/material";
+import { useState } from "react";
+import {
+  Box,
+  Typography,
+  Button,
+  TextField,
+  Divider,
+  IconButton,
+} from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
+import CloseIcon from "@mui/icons-material/Close";
+import GridLayout from "./grid-layout";
+import LeftSection from "./left-section";
 
 const Photos = () => {
-  const [logo, setLogo] = useState(null); // State for logo
-  const [coverImage, setCoverImage] = useState(null); // State for cover image
-  const [products, setProducts] = useState([]); // State for product details
+  const [logo, setLogo] = useState(null);
+  const [coverImage, setCoverImage] = useState(null);
+  const [products, setProducts] = useState([]);
 
-  // Handle image upload
   const handleImageUpload = (event, type, productIndex = null) => {
     const file = event.target.files[0];
     if (file) {
-      const imageUrl = URL.createObjectURL(file); // Create a URL for the uploaded image
-      if (type === "logo") {
-        setLogo(imageUrl);
-      } else if (type === "cover") {
-        setCoverImage(imageUrl);
-      } else if (type === "product") {
+      const imageUrl = URL.createObjectURL(file);
+      if (type === "logo") setLogo(imageUrl);
+      else if (type === "cover") setCoverImage(imageUrl);
+      else if (type === "product") {
         const updatedProducts = [...products];
         updatedProducts[productIndex].image = imageUrl;
         setProducts(updatedProducts);
@@ -24,75 +31,45 @@ const Photos = () => {
     }
   };
 
-  // Add a new product section
+  const removeImage = (type, index = null) => {
+    if (type === "logo") setLogo(null);
+    else if (type === "cover") setCoverImage(null);
+    else if (type === "product") {
+      setProducts((prevProducts) => prevProducts.filter((_, i) => i !== index));
+    }
+  };
+
   const addProduct = () => {
     setProducts([...products, { name: "", price: "", image: null }]);
   };
 
-  // Handle product details input
   const handleProductInput = (index, field, value) => {
     const updatedProducts = [...products];
     updatedProducts[index][field] = value;
     setProducts(updatedProducts);
   };
 
-  // Handle form submission
   const handleSubmit = () => {
-    // Mock data submission
-    const formData = {
-      logo,
-      coverImage,
-      products,
-    };
-
-    // Replace this with an API call to your backend
+    const formData = { logo, coverImage, products };
     console.log("Submitted Data:", formData);
-
     alert("Photos and products submitted successfully!");
   };
 
-  const removeProduct = (index) => {
-    setProducts((prevProducts) => prevProducts.filter((_, i) => i !== index));
-  };
-  
-
   return (
-    <Box
-      sx={{
-        padding: "2rem",
-        paddingTop: "64px", // Adjust for AppBar height
-      }}
-    >
-      <Typography variant="h4" sx={{ marginBottom: "2rem" }}>
-        Photos
-      </Typography>
+    <GridLayout
+      marginTop="64px"
+      leftContent={
+        <LeftSection
+          imageSrc="/assets/tatu-moto.png"
+          altText="Business Logo"
+        />
+      }
+      rightContent={
+        <Box sx={{ marginTop: "16px", padding: "1rem" }}>
+          <Typography variant="h4" sx={{ marginBottom: "2rem" }}>
+            Photos
+          </Typography>
 
-      <Grid container spacing={2}>
-        {/* Left Column - Logo */}
-        <Grid item xs={12} md={4}>
-          <Box
-            sx={{
-              textAlign: "center",
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              height: "100%",
-            }}
-          >
-            <img
-              src="/assets/tatu-moto.png"
-              alt="Business Logo"
-              style={{
-                width: "100%",
-                maxWidth: "300px",
-                borderRadius: "8px",
-              }}
-            />
-          </Box>
-        </Grid>
-
-        {/* Right Column - Other Sections */}
-        <Grid item xs={12} md={8}>
           {/* Logo Section */}
           <Box sx={{ marginBottom: "2rem" }}>
             <Typography variant="h5" sx={{ marginBottom: "1rem" }}>
@@ -101,7 +78,6 @@ const Photos = () => {
             <Box
               sx={{
                 display: "flex",
-                flexDirection: "column",
                 alignItems: "center",
                 justifyContent: "center",
                 border: "2px dashed #d32323",
@@ -110,22 +86,42 @@ const Photos = () => {
                 height: "150px",
                 width: "150px",
                 cursor: "pointer",
-                textAlign: "center",
                 position: "relative",
               }}
               onClick={() => document.getElementById("logo-upload").click()}
             >
               {logo ? (
-                <img
-                  src={logo}
-                  alt="Logo Preview"
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "cover",
-                    borderRadius: "8px",
-                  }}
-                />
+                <>
+                  <img
+                    src={logo}
+                    alt="Logo Preview"
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                      borderRadius: "8px",
+                    }}
+                  />
+                  <IconButton
+                    onClick={(e) => {
+                      e.stopPropagation(); // Prevents the file upload dialog from opening
+                      removeImage("logo");
+                    }}
+                    sx={{
+                      position: "absolute",
+                      top: "-8px",
+                      right: "-8px",
+                      color: "grey",
+                      backgroundColor: "#fff",
+                      border: "1px solid #ddd",
+                      "&:hover": {
+                        backgroundColor: "#f5f5f5",
+                      },
+                    }}
+                  >
+                    <CloseIcon />
+                  </IconButton>
+                </>
               ) : (
                 <>
                   <IconButton sx={{ color: "#d32323" }}>
@@ -135,6 +131,13 @@ const Photos = () => {
                 </>
               )}
             </Box>
+            <input
+              type="file"
+              id="logo-upload"
+              style={{ display: "none" }}
+              accept="image/*"
+              onChange={(e) => handleImageUpload(e, "logo")}
+            />
           </Box>
 
           <Divider sx={{ marginBottom: "2rem" }} />
@@ -156,22 +159,42 @@ const Photos = () => {
                 width: "100%",
                 maxWidth: "500px",
                 cursor: "pointer",
-                textAlign: "center",
                 position: "relative",
               }}
               onClick={() => document.getElementById("cover-upload").click()}
             >
               {coverImage ? (
-                <img
-                  src={coverImage}
-                  alt="Cover Preview"
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "cover",
-                    borderRadius: "8px",
-                  }}
-                />
+                <>
+                  <img
+                    src={coverImage}
+                    alt="Cover Preview"
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                      borderRadius: "8px",
+                    }}
+                  />
+                  <IconButton
+                    onClick={(e) => {
+                      e.stopPropagation(); // Prevents the file upload dialog from opening
+                      removeImage("cover");
+                    }}
+                    sx={{
+                      position: "absolute",
+                      top: "-8px",
+                      right: "-8px",
+                      color: "grey",
+                      backgroundColor: "#fff",
+                      border: "1px solid #ddd",
+                      "&:hover": {
+                        backgroundColor: "#f5f5f5",
+                      },
+                    }}
+                  >
+                    <CloseIcon />
+                  </IconButton>
+                </>
               ) : (
                 <>
                   <IconButton sx={{ color: "#d32323" }}>
@@ -198,133 +221,129 @@ const Photos = () => {
               Product Details
             </Typography>
             {products.map((product, index) => (
-  <Box
-    key={index}
-    sx={{
-      display: "flex",
-      alignItems: "center",
-      gap: "1rem",
-      marginBottom: "1rem",
-      border: "1px solid #ddd",
-      padding: "1rem",
-      borderRadius: "8px",
-      position: "relative", // To position the "X" button
-      "&:hover .remove-btn": { display: "block" }, // Show the "X" on hover
-    }}
-  >
-    {/* Remove Product Button */}
-    <IconButton
-      className="remove-btn"
-      onClick={() => removeProduct(index)}
-      sx={{
-        position: "absolute",
-        top: "8px",
-        right: "8px",
-        color: "grey",
-        display: "none", // Hidden by default, shown on hover
-      }}
-    >
-      ✕
-    </IconButton>
+              <Box
+                key={index}
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "1rem",
+                  marginBottom: "1rem",
+                  border: "1px solid #ddd",
+                  padding: "1rem",
+                  borderRadius: "8px",
+                  position: "relative",
+                }}
+              >
+                <IconButton
+                  onClick={() => removeImage("product", index)}
+                  sx={{
+                    position: "absolute",
+                    top: "-8px",
+                    right: "-8px",
+                    color: "grey",
+                    backgroundColor: "#fff",
+                    border: "1px solid #ddd",
+                    "&:hover": {
+                      backgroundColor: "#f5f5f5",
+                    },
+                  }}
+                >
+                  <CloseIcon />
+                </IconButton>
 
-    {/* Image Upload */}
-    <Box
-      sx={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        border: "2px dashed #d32323",
-        borderRadius: "8px",
-        width: "100px",
-        height: "100px",
-        cursor: "pointer",
-      }}
-      onClick={() =>
-        document.getElementById(`product-upload-${index}`).click()
-      }
-    >
-      {product.image ? (
-        <img
-          src={product.image}
-          alt={`Product ${index + 1}`}
-          style={{
-            width: "100%",
-            height: "100%",
-            objectFit: "cover",
-            borderRadius: "8px",
-          }}
-        />
-      ) : (
-        <IconButton sx={{ color: "#d32323" }}>
-          <AddIcon />
-        </IconButton>
-      )}
-    </Box>
-    <input
-      type="file"
-      id={`product-upload-${index}`}
-      style={{ display: "none" }}
-      accept="image/*"
-      onChange={(e) => handleImageUpload(e, "product", index)}
-    />
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    border: "2px dashed #d32323",
+                    borderRadius: "8px",
+                    width: "100px",
+                    height: "100px",
+                    cursor: "pointer",
+                  }}
+                  onClick={() =>
+                    document.getElementById(`product-upload-${index}`).click()
+                  }
+                >
+                  {product.image ? (
+                    <img
+                      src={product.image}
+                      alt={`Product ${index + 1}`}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                        borderRadius: "8px",
+                      }}
+                    />
+                  ) : (
+                    <IconButton sx={{ color: "#d32323" }}>
+                      <AddIcon />
+                    </IconButton>
+                  )}
+                </Box>
+                <input
+                  type="file"
+                  id={`product-upload-${index}`}
+                  style={{ display: "none" }}
+                  accept="image/*"
+                  onChange={(e) => handleImageUpload(e, "product", index)}
+                />
 
-    {/* Product Details */}
-    <Box sx={{ flex: 1 }}>
-      <TextField
-        fullWidth
-        label="Product Name"
-        value={product.name}
-        onChange={(e) =>
-          handleProductInput(index, "name", e.target.value)
-        }
-        sx={{ marginBottom: "0.5rem" }}
-      />
-      <TextField
-        fullWidth
-        label="Product Price"
-        value={product.price}
-        onChange={(e) =>
-          handleProductInput(index, "price", e.target.value)
-        }
-      />
-    </Box>
-  </Box>
-))}
+                <Box sx={{ flex: 1 }}>
+                  <TextField
+                    fullWidth
+                    label="Product Name"
+                    value={product.name}
+                    onChange={(e) =>
+                      handleProductInput(index, "name", e.target.value)
+                    }
+                    sx={{ marginBottom: "0.5rem" }}
+                  />
+                  <TextField
+                    fullWidth
+                    label="Product Price"
+                    value={product.price}
+                    onChange={(e) =>
+                      handleProductInput(index, "price", e.target.value)
+                    }
+                  />
+                </Box>
+              </Box>
+            ))}
 
             <Button
               variant="outlined"
+              onClick={addProduct}
               sx={{
                 color: "#d32323",
                 borderColor: "#d32323",
                 textTransform: "none",
                 marginBottom: "2rem",
               }}
-              onClick={addProduct}
             >
               Add Product
             </Button>
           </Box>
 
-          {/* Submit Button */}
-          <Box>
-            <Button
-              variant="contained"
-              sx={{
-                backgroundColor: "#d32323",
-                color: "#fff",
-                textTransform: "none",
-                width: "100%",
-                padding: "10px",
-                fontSize: "16px",
-              }}
-              onClick={handleSubmit}
-            >
-              Submit
-            </Button>
-          </Box>
-        </Grid>
-      </Grid>
-    </Box>
+          <Button
+            variant="contained"
+            onClick={handleSubmit}
+            sx={{
+              backgroundColor: "#d32323",
+              color: "#fff",
+              textTransform: "none",
+              width: "100%",
+              padding: "10px",
+              fontSize: "16px",
+            }}
+          >
+            Upload
+          </Button>
+        </Box>
+      }
+    />
   );
 };
 

@@ -16,8 +16,7 @@ import UserProfile from './components/user-profile';
 import Review from './components/review';
 import ReviewReply from "./components/review_reply";
 import Photos from "./components/photos";
-// import Photos from './components/photos'; // Assuming you have a Photos component
-// import Analytics from './components/analytics'; // Assuming you have an Analytics component
+import Analytics from './components/analytics'; 
 // import Settings from './components/settings'; // Assuming you have a Settings component
 
 const AppWithHeader = () => {
@@ -102,7 +101,7 @@ const AppWithHeader = () => {
         <Route path="/review" element={<Review />}/>
         <Route path="/review_reply" element={<ReviewReply />} />
         <Route path="/photos" element={<Photos />} />
-        {/* <Route path="/analytics" element={<Analytics />} /> */}
+        <Route path="/analytics" element={<Analytics />} />
         {/* <Route path="/settings" element={<Settings />} /> */}
         {/* Add more routes as needed */}
       </Routes>

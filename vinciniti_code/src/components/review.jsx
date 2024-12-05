@@ -1,3 +1,4 @@
+import Container from "./center_container";
 import { useState } from "react";
 
 
@@ -45,7 +46,7 @@ const Review = () => {
   };
 
   return (
-    <div style={{ fontFamily: "Arial, sans-serif", padding: "20px" }}>
+ <Container>
       {/* Header */}
       <header style={{ borderBottom: "1px solid #ddd", marginBottom: "20px", paddingBottom: "10px" }}>
         <h1 style={{ fontSize: "24px", margin: 0 }}>Temple Nightclub</h1>
@@ -140,7 +141,7 @@ const Review = () => {
           ))}
         </div>
       </div>
-    </div>
+    </Container>
   );
 };
 

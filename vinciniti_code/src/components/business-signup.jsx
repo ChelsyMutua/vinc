@@ -2,6 +2,12 @@ import { Form, Input, Button, Layout, Typography, Space, message } from "antd";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { PhoneOutlined, EnvironmentOutlined, ShopOutlined, UserOutlined, MailOutlined } from "@ant-design/icons";
+import { useState, useEffect } from 'react';
+import { businessData } from "./businessData";
+import { Marker } from '@react-google-maps/api';
+import MapLocation from './map_location';
+
+
 
 
 const { Content } = Layout;
@@ -33,38 +39,103 @@ export async function submitBusinessProfile(values) {
 export default function BusinessSignUp() {
   const [form] = Form.useForm();
   const navigate = useNavigate();
+  
 
-  const onFinish = async (values) => {
-    const hideLoading = message.loading("Submitting your profile...", 0);
-    try {
-      const response = await submitBusinessProfile({
-        first_name: values.firstName,
-        last_name: values.lastName,
-        email: values.email,
-        password: values.password,
-        confirm_password: values.confirm,
-        business_name: values.businessName,
-        phone_number: values.phoneNumber,
-        address: values.address,
-        city: values.city,
-        postal_code: values.postalCode,
-        app_suite: values.aptSuite || '', // Optional field
-      });
-  
-      if (response.success) {
-        hideLoading(); // Hide loading spinner
-        message.success(response.message);
-        navigate('/signup-confirmation'); // Redirect to confirmation page
-      } else {
-        hideLoading();
-        message.error(response.message);
+    // State for business locations
+    const [businessLocations, setBusinessLocations] = useState([]);
+
+// Fetch business locations
+useEffect(() => {
+  axios
+    .get("/api/businesses")
+    .then((response) => {
+      setBusinessLocations(response.data);
+    })
+    .catch((error) => {
+      console.error("Error fetching business locations:", error);
+    });
+}, []);
+
+function getFullAddress(business) {
+  const { address, apartmentSuite, city, postalCode } = business;
+  let fullAddress = address;
+
+  if (apartmentSuite) {
+    fullAddress += `, ${apartmentSuite}`;
+  }
+
+  fullAddress += `, ${city}, ${postalCode}`;
+  return fullAddress;
+}
+
+async function geocodeAddress(address) {
+  try {
+    const response = await axios.get(
+      "https://maps.googleapis.com/maps/api/geocode/json",
+      {
+        params: {
+          address: address,
+          key: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
+        },
       }
-    } catch (error) {
-      hideLoading();
-      message.error("Something went wrong. Please try again.");
+    );
+
+    if (response.data.status === "OK") {
+      const location = response.data.results[0].geometry.location;
+      return {
+        latitude: location.lat,
+        longitude: location.lng,
+      };
+    } else {
+      console.error("Geocoding failed:", response.data.status);
+      return null;
     }
+  } catch (error) {
+    console.error("Error during geocoding:", error);
+    return null;
+  }
+}
+
+const onFinish = async (values) => {
+  console.log("Received values:", values);
+
+  // Combine address components
+  const fullAddress = getFullAddress({
+    address: values.address,
+    apartmentSuite: values.aptSuite, // Corrected key
+    city: values.city,
+    postalCode: values.postalCode,
+  });
+
+  // Geocode the address
+  const coordinates = await geocodeAddress(fullAddress);
+
+  if (!coordinates) {
+    alert("Unable to determine location from the provided address.");
+    return;
+  }
+
+  // Prepare data to send to the backend, including coordinates
+  const businessDataToSend = {
+    ...values,
+    latitude: coordinates.latitude,
+    longitude: coordinates.longitude,
   };
-  
+
+  // Send data to the backend
+  try {
+    const response = await axios.post("/api/businesses", businessDataToSend);
+    if (response.status === 201) {
+      alert("Business registered successfully!");
+      navigate("/signup-confirmation");
+    }
+  } catch (error) {
+    console.error("Error registering business:", error);
+    alert("An error occurred while registering the business.");
+  }
+};
+
+const categories = businessData.map((category) => category.category);
 
   return (
     <Layout style={{ minHeight: '100vh', backgroundColor: 'white' }}>
@@ -195,6 +266,16 @@ export default function BusinessSignUp() {
               </Button>
             </Form.Item>
           </Form>
+
+          <MapLocation>
+          {businessLocations.map((business) => (
+              <Marker
+                key={business.id}
+                position={{ lat: business.latitude, lng: business.longitude }}
+                title={business.name}
+              />
+            ))}
+          </MapLocation>
         </div>
       </Content>
     </Layout>

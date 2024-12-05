@@ -1,118 +1,255 @@
-'use client'
+import { useState } from 'react';
+import {
+  Container,
+  Typography,
+  Card,
+  CardContent,
+  CardHeader,
+  Avatar,
+  Button,
+  Grid,
+  TextField,
+  Box,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+} from '@mui/material';
+import { deepPurple } from '@mui/material/colors';
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-
-// This would typically come from an API
-const mockUserData = {
-  firstName: "John",
-  lastName: "Doe",
-  email: "john.doe@example.com",
-  phone: "+254 712 345 678",
-  location: "Downtown Road",
-  country: "Kenya",
-  city: "Nairobi",
-  apartment: "Sunset Apartments",
-  houseNo: "A4"
-}
+// Initial mock user data
+const initialUserData = {
+  firstName: 'John',
+  lastName: 'Doe',
+  email: 'john.doe@example.com',
+  phone: '+254 712 345 678',
+  location: 'Downtown Road',
+  country: 'Kenya',
+  city: 'Nairobi',
+  apartment: 'Sunset Apartments',
+  houseNo: 'A4',
+};
 
 export default function UserProfile() {
-  // Get initials for avatar
+  // State for user data
+  const [userData, setUserData] = useState(initialUserData);
+
+  // State to control modal visibility
+  const [open, setOpen] = useState(false);
+
+  // State to manage edited data
+  const [editedData, setEditedData] = useState(userData);
+
+  // Function to get initials for avatar
   const getInitials = (firstName, lastName) => {
     return `${firstName[0]}${lastName[0]}`.toUpperCase();
   };
-  
+
+  // Handler to open modal
+  const handleOpen = () => {
+    setEditedData(userData); // Reset edited data to current user data
+    setOpen(true);
+  };
+
+  // Handler to close modal
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  // Handler to save changes
+  const handleSave = () => {
+    setUserData(editedData);
+    setOpen(false);
+  };
+
+  // Handler for input changes in the modal
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setEditedData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+  };
 
   return (
-    <div className="container mx-auto py-8 max-w-3xl">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">My Profile</h1>
-      </div>
+    <Container maxWidth="md" sx={{ py: 8 }}>
+      {/* Header */}
+      <Box display="flex" justifyContent="space-between" alignItems="center" mb={4}>
+        <Typography variant="h4" component="h1">
+          My Profile
+        </Typography>
+      </Box>
 
-      <Card className="mb-6">
-        <CardContent className="pt-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Avatar className="h-20 w-20">
-                <AvatarFallback className="text-lg">
-                  {getInitials(mockUserData.firstName, mockUserData.lastName)}
-                </AvatarFallback>
+      {/* Profile Card */}
+      <Card elevation={0} sx={{ mb: 4, border: '1px solid lightgrey', borderRadius: '2rem' }}>
+        <CardContent>
+          <Grid container alignItems="center" spacing={2}>
+            {/* Avatar and User Info */}
+            <Grid item>
+              <Avatar sx={{ bgcolor: deepPurple[500], width: 80, height: 80, fontSize: '2rem' }}>
+                {getInitials(userData.firstName, userData.lastName)}
               </Avatar>
-              <div>
-                <h2 className="text-xl font-semibold">
-                  {mockUserData.firstName} {mockUserData.lastName}
-                </h2>
-                <p className="text-muted-foreground">{mockUserData.location}</p>
-              </div>
-            </div>
-            <Button variant="outline">Edit</Button>
-          </div>
+            </Grid>
+            <Grid item xs>
+              <Typography variant="h5">
+                {userData.firstName} {userData.lastName}
+              </Typography>
+              <Typography color="textSecondary">{userData.location}</Typography>
+            </Grid>
+            {/* Edit Button */}
+            <Grid item>
+              <Button variant="outlined" color="primary" onClick={handleOpen}>
+                Edit
+              </Button>
+            </Grid>
+          </Grid>
         </CardContent>
       </Card>
 
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle>Personal Information</CardTitle>
-        </CardHeader>
-        <CardContent className="grid gap-6">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>First Name</Label>
-              <Input value={mockUserData.firstName} readOnly />
-            </div>
-            <div className="space-y-2">
-              <Label>Last Name</Label>
-              <Input value={mockUserData.lastName} readOnly />
-            </div>
-          </div>
-          <div className="space-y-2">
-            <Label>Email address</Label>
-            <Input value={mockUserData.email} readOnly />
-          </div>
-          <div className="space-y-2">
-            <Label>Phone</Label>
-            <Input value={mockUserData.phone} readOnly />
-          </div>
+      {/* Personal Information Card */}
+      <Card
+        elevation={0}
+        sx={{ mb: 3, border: '1px solid lightgrey', borderRadius: '2rem', padding: '1rem' }}
+      >
+        <CardHeader
+          title="Personal Information"
+          // Removed the 'action' prop to eliminate the Edit button
+          // action={
+          //   <Button variant="outlined" color="primary" onClick={handleOpen}>
+          //     Edit
+          //   </Button>
+          // }
+        />
+        <CardContent>
+          <Grid container spacing={3}>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                label="First Name"
+                name="firstName"
+                value={userData.firstName}
+                InputProps={{
+                  readOnly: true,
+                }}
+                fullWidth
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                label="Last Name"
+                name="lastName"
+                value={userData.lastName}
+                InputProps={{
+                  readOnly: true,
+                }}
+                fullWidth
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                label="Email Address"
+                type="email"
+                name="email"
+                value={userData.email}
+                InputProps={{
+                  readOnly: true,
+                }}
+                fullWidth
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                label="Phone"
+                type="tel"
+                name="phone"
+                value={userData.phone}
+                InputProps={{
+                  readOnly: true,
+                }}
+                fullWidth
+              />
+            </Grid>
+            {/* Edit Button removed from here */}
+          </Grid>
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Address</CardTitle>
-        </CardHeader>
-        <CardContent className="grid gap-6">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Country</Label>
-              <Input value={mockUserData.country} readOnly />
-            </div>
-            <div className="space-y-2">
-              <Label>City</Label>
-              <Input value={mockUserData.city} readOnly />
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Apartment</Label>
-              <Input value={mockUserData.apartment} readOnly />
-            </div>
-            <div className="space-y-2">
-              <Label>House No.</Label>
-              <Input value={mockUserData.houseNo} readOnly />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
 
-      <div className="mt-6 text-right">
-        <Button variant="ghost" className="text-destructive hover:text-destructive">
+      {/* Log Out Button */}
+      <Box display="flex" justifyContent="flex-end">
+        <Button variant="outlined" color="error">
           Log Out
         </Button>
-      </div>
-    </div>
-  )
-}
+      </Box>
 
+      {/* Edit Modal */}
+      <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
+        <DialogTitle>Edit Personal Information</DialogTitle>
+        <DialogContent>
+          <Box component="form" sx={{ mt: 2 }}>
+            <Grid container spacing={3}>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  label="First Name"
+                  name="firstName"
+                  value={editedData.firstName}
+                  onChange={handleChange}
+                  fullWidth
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  label="Last Name"
+                  name="lastName"
+                  value={editedData.lastName}
+                  onChange={handleChange}
+                  fullWidth
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  label="Email Address"
+                  type="email"
+                  name="email"
+                  value={editedData.email}
+                  onChange={handleChange}
+                  fullWidth
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  label="Phone"
+                  type="tel"
+                  name="phone"
+                  value={editedData.phone}
+                  onChange={handleChange}
+                  fullWidth
+                />
+              </Grid>
+            </Grid>
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={handleClose}
+            variant="outlined"
+            sx={{ borderRadius: '2rem',
+              padding: '0.8rem'
+             }}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleSave}
+            variant="contained"
+            backgroundColor="#ef6b61"
+            sx={{ borderRadius: '2rem',
+              padding: '1rem'
+             }}
+          >
+            Save
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Container>
+  );
+}

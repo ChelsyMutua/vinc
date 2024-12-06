@@ -792,6 +792,150 @@ router.put('/businesses/hours/edit', async (req, res) => {
   }
 });
 
+// Add a review
+router.post('/businesses/:businessId/reviews', async (req, res) => {
+  const { businessId } = req.params;
+  const { rating, comment } = req.body;
+
+  // Validate inputs
+  if (!rating || rating < 1 || rating > 5) {
+    return res.status(400).json({ message: 'Rating must be between 1 and 5' });
+  }
+  if (!comment) {
+    return res.status(400).json({ message: 'Comment is required' });
+  }
+
+  try {
+    // Check if the user is logged in
+    if (!req.session.userId) {
+      return res.status(401).json({ message: 'Unauthorized: Please log in' });
+    }
+
+    // Retrieve the logged-in user's details
+    const userResult = await pool.query('SELECT * FROM users WHERE user_id = $1', [req.session.userId]);
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const user = userResult.rows[0];
+
+    // Check if the user is a customer
+    if (user.role !== 'customer') {
+      return res.status(403).json({ message: 'Only customers can add reviews' });
+    }
+
+    // Check if the business exists
+    const businessResult = await pool.query('SELECT * FROM businesses WHERE business_id = $1', [businessId]);
+    if (businessResult.rows.length === 0) {
+      return res.status(404).json({ message: 'Business not found' });
+    }
+
+    // Insert the review
+    const reviewResult = await pool.query(
+      `INSERT INTO reviews (business_id, user_id, rating, comment, created_at) 
+       VALUES ($1, $2, $3, $4, NOW()) 
+       RETURNING review_id, business_id, user_id, rating, comment, created_at`,
+      [businessId, user.user_id, rating, comment]
+    );
+
+    res.status(201).json({
+      message: 'Review added successfully',
+      review: reviewResult.rows[0],
+    });
+  } catch (error) {
+    console.error('Error adding review:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
+
+
+// Get reviews for a business
+router.get('/businesses/:businessId/reviews', async (req, res) => {
+  const { businessId } = req.params;
+
+  try {
+    // Check if the business exists
+    const businessResult = await pool.query('SELECT * FROM businesses WHERE business_id = $1', [businessId]);
+    if (businessResult.rows.length === 0) {
+      return res.status(404).json({ message: 'Business not found' });
+    }
+
+    // Retrieve reviews for the business
+    const reviewsResult = await pool.query(
+      `SELECT 
+         r.review_id, r.rating, r.comment, r.created_at, r.reply,
+         u.first_name || ' ' || u.last_name AS reviewer_name
+       FROM reviews r
+       INNER JOIN users u ON r.user_id = u.user_id
+       WHERE r.business_id = $1
+       ORDER BY r.created_at DESC`,
+      [businessId]
+    );
+
+    res.json(reviewsResult.rows);
+  } catch (error) {
+    console.error('Error fetching reviews:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
+
+// Reply to a review
+router.put('/reviews/:reviewId/reply', async (req, res) => {
+  const { reviewId } = req.params;
+  const { reply } = req.body;
+
+  if (!reply) {
+    return res.status(400).json({ message: 'Reply is required' });
+  }
+
+  try {
+    // Check if the user is logged in
+    if (!req.session.userId) {
+      return res.status(401).json({ message: 'Unauthorized: Please log in' });
+    }
+
+    // Retrieve the logged-in user's details
+    const userResult = await pool.query('SELECT * FROM users WHERE user_id = $1', [req.session.userId]);
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const user = userResult.rows[0];
+
+    // Check if the user is a business_owner
+    if (user.role !== 'business_owner') {
+      return res.status(403).json({ message: 'Only business owners can reply to reviews' });
+    }
+
+    // Retrieve the review and associated business
+    const reviewResult = await pool.query(
+      `SELECT r.business_id, b.owner_id 
+       FROM reviews r
+       INNER JOIN businesses b ON r.business_id = b.business_id
+       WHERE r.review_id = $1`,
+      [reviewId]
+    );
+
+    if (reviewResult.rows.length === 0) {
+      return res.status(404).json({ message: 'Review not found' });
+    }
+
+    const review = reviewResult.rows[0];
+
+    // Check if the logged-in user owns the business
+    if (review.owner_id !== user.user_id) {
+      return res.status(403).json({ message: 'Access denied: You do not own this business' });
+    }
+
+    // Add the reply
+    await pool.query('UPDATE reviews SET reply = $1 WHERE review_id = $2', [reply, reviewId]);
+
+    res.json({ message: 'Reply added successfully' });
+  } catch (error) {
+    console.error('Error replying to review:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
 
 
 // Define the server port

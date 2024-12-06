@@ -1,8 +1,37 @@
-import { Box, Typography } from "@mui/material";
+import { useState } from 'react';
+import { Box, Typography, Grid, Card, CardContent } from "@mui/material";
 import GridLayout from "./grid-layout";
 import LeftSection from "./left-section";
+import ReviewsIcon from '@mui/icons-material/Reviews';
+import StarIcon from '@mui/icons-material/Star';
+import SentimentSatisfiedIcon from '@mui/icons-material/SentimentSatisfied';
+import MapIcon from '@mui/icons-material/Map';
+
+// Function to generate simulated data
+const generateSimulatedData = () => {
+  const totalReviews = Math.floor(Math.random() * 2000) + 1000; // 1000 - 2999
+  const averageRating = (Math.random() * 2 + 3).toFixed(1); // 3.0 - 5.0
+  const positive = Math.floor(Math.random() * 100);
+  const neutral = Math.floor(Math.random() * (100 - positive));
+  const negative = 100 - positive - neutral;
+  const mapClicks = Math.floor(Math.random() * 500) + 100; // 100 - 599
+
+  return {
+    totalReviews,
+    averageRating,
+    sentimentAnalysis: {
+      positive,
+      neutral,
+      negative,
+    },
+    mapClicks,
+  };
+};
 
 const Analytics = () => {
+  // Initialize state with simulated data generated once
+  const [analyticsData] = useState(generateSimulatedData());
+
   return (
     <GridLayout
       leftContent={
@@ -12,171 +41,174 @@ const Analytics = () => {
         />
       }
       rightContent={
-        <Box sx={{ padding: "1rem 0 1rem 1rem", height: "100%" }}>
+        <Box sx={{ padding: "2rem", height: "100%" }}>
           <Typography
             variant="h4"
             sx={{
-              marginBottom: "1.5rem",
+              marginBottom: "2rem",
               color: "white",
               fontWeight: "bold",
+              fontSize: { xs: "1.5rem", sm: "2rem", md: "2.5rem" },
             }}
           >
             Analytics Dashboard
           </Typography>
 
           {/* Grid for Cards */}
-          <Box
+          <Grid container spacing={4}>
+            {/* Card 1: Total Number of Reviews */}
+            <Grid item xs={12} sm={12} md={6}>
+            <Card
             sx={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr", // Two equal columns
-              gridTemplateRows: "1fr 1fr", // Two equal rows
-              gap: "1rem", // Reduced gap between cards
-              height: "calc(100% - 2rem)", // Ensures cards fill the remaining height
+              backgroundColor: "#1e1e1e",
+              borderRadius: "12px",
+              color: "white",
+              height: "100%",
+              transition: "transform 0.3s",
+              "&:hover": {
+                transform: "scale(1.05)",
+              },
             }}
           >
-            {/* Card 1: Transactions */}
-            <Box
-              sx={{
-                backgroundColor: "black",
-                borderRadius: "12px",
-                padding: "1.5rem",
-                color: "white",
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "space-between",
-              }}
-            >
-              <Typography variant="h6" sx={{ marginBottom: "1rem" }}>
-                Transactions
-              </Typography>
-              <Box>
-                <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    marginBottom: "0.5rem",
-                  }}
-                >
-                  <Typography>Youtube Music</Typography>
-                  <Typography color="error">- $55.50</Typography>
-                </Box>
-                <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    marginBottom: "0.5rem",
-                  }}
-                >
-                  <Typography>Easy Pay</Typography>
-                  <Typography color="success.main">+ $1,955.00</Typography>
-                </Box>
-                <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                  }}
-                >
-                  <Typography>iTunes</Typography>
-                  <Typography color="error">- $25.00</Typography>
-                </Box>
-              </Box>
-            </Box>
+                <CardContent>
+                  <ReviewsIcon
+                    sx={{ fontSize: 50, color: "#4caf50", mb: 2 }}
+                  />
+                  <Typography variant="h6" gutterBottom>
+                    Total Reviews
+                  </Typography>
+                  <Typography
+                    variant="h3"
+                    sx={{ fontWeight: "bold", color: "#4caf50" }}
+                  >
+                    {analyticsData.totalReviews}
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Grid>
 
-            {/* Card 2: Total */}
-            <Box
+            {/* Card 2: Average Customer Rating */}
+            <Grid item xs={12} sm={12} md={6}>
+            <Card
               sx={{
-                backgroundColor: "black",
+                backgroundColor: "#1e1e1e",
                 borderRadius: "12px",
-                padding: "1.5rem",
                 color: "white",
-                textAlign: "center",
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "center",
+                height: "100%",
+                transition: "transform 0.3s",
+                "&:hover": {
+                  transform: "scale(1.05)",
+                },
               }}
             >
-              <Typography variant="h6" sx={{ marginBottom: "1rem" }}>
-                Total
-              </Typography>
-              <Typography
-                variant="h3"
-                sx={{
-                  fontWeight: "bold",
-                  color: "success.main",
-                }}
-              >
-                $94,475
-              </Typography>
-              <Typography variant="body2" sx={{ color: "gray" }}>
-                Last updated: Today
-              </Typography>
-            </Box>
+                <CardContent>
+                  <StarIcon
+                    sx={{ fontSize: 50, color: "#ff9800", mb: 2 }}
+                  />
+                  <Typography variant="h6" gutterBottom>
+                    Average Rating
+                  </Typography>
+                  <Typography
+                    variant="h3"
+                    sx={{ fontWeight: "bold", color: "#ff9800" }}
+                  >
+                    {analyticsData.averageRating} / 5
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Grid>
 
-            {/* Card 3: Users in Last Week */}
-            <Box
+            {/* Card 3: Sentiment Analysis */}
+            <Grid item xs={12} sm={12} md={6}>
+            <Card
               sx={{
-                backgroundColor: "black",
+                backgroundColor: "#1e1e1e",
                 borderRadius: "12px",
-                padding: "1.5rem",
                 color: "white",
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "space-between",
+                height: "100%",
+                transition: "transform 0.3s",
+                "&:hover": {
+                  transform: "scale(1.05)",
+                },
               }}
             >
-              <Typography variant="h6" sx={{ marginBottom: "1rem" }}>
-                Users in the Last Week
-              </Typography>
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                }}
-              >
-                <Typography
-                  variant="h4"
-                  sx={{ fontWeight: "bold", color: "success.main" }}
-                >
-                  +2.1%
-                </Typography>
-                <Typography variant="body2" sx={{ color: "gray" }}>
-                  Compared to last week
-                </Typography>
-              </Box>
-            </Box>
+                <CardContent>
+                  <SentimentSatisfiedIcon
+                    sx={{ fontSize: 50, color: "#2196f3", mb: 2 }}
+                  />
+                  <Typography variant="h6" gutterBottom>
+                    Sentiment Analysis
+                  </Typography>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      mt: 2,
+                    }}
+                  >
+                    <Box>
+                      <Typography variant="body1">Positive</Typography>
+                      <Typography
+                        variant="h5"
+                        sx={{ color: "#4caf50" }}
+                      >
+                        {analyticsData.sentimentAnalysis.positive}%
+                      </Typography>
+                    </Box>
+                    <Box>
+                      <Typography variant="body1">Neutral</Typography>
+                      <Typography
+                        variant="h5"
+                        sx={{ color: "#ffeb3b" }}
+                      >
+                        {analyticsData.sentimentAnalysis.neutral}%
+                      </Typography>
+                    </Box>
+                    <Box>
+                      <Typography variant="body1">Negative</Typography>
+                      <Typography
+                        variant="h5"
+                        sx={{ color: "#f44336" }}
+                      >
+                        {analyticsData.sentimentAnalysis.negative}%
+                      </Typography>
+                    </Box>
+                  </Box>
+                </CardContent>
+              </Card>
+            </Grid>
 
-            {/* Card 4: Balance */}
-            <Box
+            {/* Card 4: Map Clicks for Directions */}
+            <Grid item xs={12} sm={12} md={6}>
+            <Card
               sx={{
-                backgroundColor: "black",
+                backgroundColor: "#1e1e1e",
                 borderRadius: "12px",
-                padding: "1.5rem",
                 color: "white",
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "space-between",
+                height: "100%",
+                transition: "transform 0.3s",
+                "&:hover": {
+                  transform: "scale(1.05)",
+                },
               }}
             >
-              <Typography variant="h6" sx={{ marginBottom: "1rem" }}>
-                Balance
-              </Typography>
-              <Typography
-                variant="h3"
-                sx={{
-                  fontWeight: "bold",
-                  color: "success.main",
-                  marginBottom: "0.5rem",
-                }}
-              >
-                $162,745.00
-              </Typography>
-              <Typography variant="body2" sx={{ color: "gray" }}>
-                Total Week Profit:{" "}
-                <span style={{ color: "#4caf50" }}>+11.05%</span>
-              </Typography>
-            </Box>
-          </Box>
+                <CardContent>
+                  <MapIcon
+                    sx={{ fontSize: 50, color: "#2196f3", mb: 2 }}
+                  />
+                  <Typography variant="h6" gutterBottom>
+                    Map Clicks for Directions
+                  </Typography>
+                  <Typography
+                    variant="h3"
+                    sx={{ fontWeight: "bold", color: "#2196f3" }}
+                  >
+                    {analyticsData.mapClicks}
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+          </Grid>
         </Box>
       }
     />

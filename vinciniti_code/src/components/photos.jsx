@@ -1,4 +1,5 @@
-import { useState } from "react";
+// src/Photos.jsx
+import { useState, useEffect } from "react";
 import {
   Box,
   Typography,
@@ -11,48 +12,229 @@ import AddIcon from "@mui/icons-material/Add";
 import CloseIcon from "@mui/icons-material/Close";
 import GridLayout from "./grid-layout";
 import LeftSection from "./left-section";
+import imageCompression from 'browser-image-compression';
 
 const Photos = () => {
   const [logo, setLogo] = useState(null);
+  const [logoFile, setLogoFile] = useState(null);
+
   const [coverImage, setCoverImage] = useState(null);
+  const [coverImageFile, setCoverImageFile] = useState(null);
+
   const [products, setProducts] = useState([]);
 
-  const handleImageUpload = (event, type, productIndex = null) => {
+  // Cleanup Blob URLs only when the component unmounts
+  useEffect(() => {
+    return () => {
+      if (logo) URL.revokeObjectURL(logo);
+      if (coverImage) URL.revokeObjectURL(coverImage);
+      products.forEach((prod) => {
+        if (prod.image) URL.revokeObjectURL(prod.image);
+      });
+    };
+  }, [logo, coverImage, products]);
+
+  /**
+   * Handles image uploads with optional compression.
+   * @param {Event} event - The file input change event.
+   * @param {string} type - The type of image ('logo', 'cover', 'product').
+   * @param {number|null} productIndex - The index of the product (if type is 'product').
+   */
+  const handleImageUpload = async (event, type, productIndex = null) => {
     const file = event.target.files[0];
     if (file) {
-      const imageUrl = URL.createObjectURL(file);
-      if (type === "logo") setLogo(imageUrl);
-      else if (type === "cover") setCoverImage(imageUrl);
-      else if (type === "product") {
+      // Validate file type
+      const validTypes = ['image/jpeg', 'image/png', 'image/gif'];
+      if (!validTypes.includes(file.type)) {
+        alert('Unsupported file type. Please upload a JPEG, PNG, or GIF image.');
+        return;
+      }
+
+      // Optional: Compress the image
+      const options = {
+        maxSizeMB: 1,
+        maxWidthOrHeight: 1920,
+        useWebWorker: true,
+      };
+      let compressedFile = file;
+
+      try {
+        compressedFile = await imageCompression(file, options);
+        console.log('Original File Size:', (file.size / 1024 / 1024).toFixed(2), 'MB');
+        console.log('Compressed File Size:', (compressedFile.size / 1024 / 1024).toFixed(2), 'MB');
+      } catch (error) {
+        console.error('Compression error:', error);
+        alert('Image compression failed. Please try a different image.');
+        return;
+      }
+
+      // Revoke previous Blob URL if exists to free memory
+      if (type === "logo" && logo) {
+        URL.revokeObjectURL(logo);
+      }
+      if (type === "cover" && coverImage) {
+        URL.revokeObjectURL(coverImage);
+      }
+      if (type === "product" && products[productIndex]?.image) {
+        URL.revokeObjectURL(products[productIndex].image);
+      }
+
+      // Create a new Blob URL for image preview
+      const imageUrl = URL.createObjectURL(compressedFile);
+
+      // Update state based on the image type
+      if (type === "logo") {
+        setLogo(imageUrl);
+        setLogoFile(compressedFile);
+      } else if (type === "cover") {
+        setCoverImage(imageUrl);
+        setCoverImageFile(compressedFile);
+      } else if (type === "product") {
         const updatedProducts = [...products];
-        updatedProducts[productIndex].image = imageUrl;
+        updatedProducts[productIndex] = {
+          ...updatedProducts[productIndex],
+          image: imageUrl,
+          imageFile: compressedFile,
+        };
         setProducts(updatedProducts);
       }
     }
   };
 
+  /**
+   * Removes an image and clears its state.
+   * @param {string} type - The type of image ('logo', 'cover', 'product').
+   * @param {number|null} index - The index of the product (if type is 'product').
+   */
   const removeImage = (type, index = null) => {
-    if (type === "logo") setLogo(null);
-    else if (type === "cover") setCoverImage(null);
-    else if (type === "product") {
+    if (type === "logo") {
+      if (logo) URL.revokeObjectURL(logo);
+      setLogo(null);
+      setLogoFile(null);
+    }
+    else if (type === "cover") {
+      if (coverImage) URL.revokeObjectURL(coverImage);
+      setCoverImage(null);
+      setCoverImageFile(null);
+    }
+    else if (type === "product" && index !== null) {
+      if (products[index].image) URL.revokeObjectURL(products[index].image);
       setProducts((prevProducts) => prevProducts.filter((_, i) => i !== index));
     }
   };
 
+  /**
+   * Adds a new product to the products array.
+   */
   const addProduct = () => {
-    setProducts([...products, { name: "", price: "", image: null }]);
+    setProducts([...products, { name: "", price: "", image: null, imageFile: null }]);
   };
 
+  /**
+   * Handles input changes for product fields.
+   * @param {number} index - The index of the product.
+   * @param {string} field - The field to update ('name' or 'price').
+   * @param {string} value - The new value for the field.
+   */
   const handleProductInput = (index, field, value) => {
     const updatedProducts = [...products];
     updatedProducts[index][field] = value;
     setProducts(updatedProducts);
   };
 
-  const handleSubmit = () => {
-    const formData = { logo, coverImage, products };
-    console.log("Submitted Data:", formData);
-    alert("Photos and products submitted successfully!");
+  /**
+   * Handles the form submission by uploading images to the API and storing URLs in PostgreSQL.
+   */
+  const handleSubmit = async () => {
+    try {
+      const apiBaseUrl = ['http://localhost:5173', 'https://vinc-production-3a9e.up.railway.app']; 
+      const uploadPromises = [];
+      const uploads = {};
+
+      // Upload logo and cover image
+      const businessFormData = new FormData();
+      if (logoFile) businessFormData.append('logo', logoFile);
+      if (coverImageFile) businessFormData.append('cover_image', coverImageFile);
+
+      if (businessFormData.has('logo') || businessFormData.has('cover_image')) {
+        const businessUpload = fetch(`${apiBaseUrl}/upload/business`, {
+          method: 'POST',
+          body: businessFormData,
+        })
+          .then(response => response.json())
+          .then(data => {
+            if (data.error) throw new Error(data.error);
+            uploads.logo = data.data.logo_url;
+            uploads.cover_image = data.data.cover_image;
+          });
+        uploadPromises.push(businessUpload);
+      }
+
+      // Upload product images
+      const productPromises = products.map(async (product) => {
+        if (product.imageFile) {
+          const productFormData = new FormData();
+          productFormData.append('product_image', product.imageFile);
+          productFormData.append('name', product.name);
+          productFormData.append('price', product.price);
+
+          const productUpload = fetch(`${apiBaseUrl}/upload/product`, {
+            method: 'POST',
+            body: productFormData,
+          })
+            .then(response => response.json())
+            .then(data => {
+              if (data.error) throw new Error(data.error);
+              return data.data.product_image_url;
+            });
+          return productUpload;
+        }
+        return null;
+      });
+
+      // Await business uploads
+      await Promise.all(uploadPromises);
+
+      // Await product uploads
+      const productUrls = await Promise.all(productPromises);
+
+      // Prepare formData (optional, based on API response)
+      const formData = {
+        logo: uploads.logo || null,
+        cover_image: uploads.cover_image || null,
+        products: products.map((product, index) => ({
+          name: product.name,
+          price: product.price,
+          image: productUrls[index] || null,
+        })),
+      };
+
+      console.log('Submitted Data:', formData);
+      alert('Photos and products uploaded successfully!');
+      resetForm();
+    } catch (error) {
+      console.error('Detailed error:', error);
+      alert(`An error occurred during the upload: ${error.message}`);
+    }
+  };
+
+  /**
+   * Resets the form to its initial state.
+   */
+  const resetForm = () => {
+    // Revoke all Blob URLs to free memory
+    if (logo) URL.revokeObjectURL(logo);
+    if (coverImage) URL.revokeObjectURL(coverImage);
+    products.forEach((product) => {
+      if (product.image) URL.revokeObjectURL(product.image);
+    });
+
+    // Reset state
+    setLogo(null);
+    setLogoFile(null);
+    setCoverImage(null);
+    setCoverImageFile(null);
+    setProducts([{ name: '', price: '', image: null, imageFile: null }]);
   };
 
   return (
@@ -118,6 +300,7 @@ const Photos = () => {
                         backgroundColor: "#f5f5f5",
                       },
                     }}
+                    aria-label="Remove Logo"
                   >
                     <CloseIcon />
                   </IconButton>
@@ -191,6 +374,7 @@ const Photos = () => {
                         backgroundColor: "#f5f5f5",
                       },
                     }}
+                    aria-label="Remove Cover Image"
                   >
                     <CloseIcon />
                   </IconButton>
@@ -247,6 +431,7 @@ const Photos = () => {
                       backgroundColor: "#f5f5f5",
                     },
                   }}
+                  aria-label={`Remove Product ${index + 1}`}
                 >
                   <CloseIcon />
                 </IconButton>
@@ -278,9 +463,12 @@ const Photos = () => {
                       }}
                     />
                   ) : (
-                    <IconButton sx={{ color: "#d32323" }}>
-                      <AddIcon />
-                    </IconButton>
+                    <>
+                      <IconButton sx={{ color: "#d32323" }}>
+                        <AddIcon />
+                      </IconButton>
+                      <Typography variant="body2">Add Image</Typography>
+                    </>
                   )}
                 </Box>
                 <input
@@ -304,6 +492,7 @@ const Photos = () => {
                   <TextField
                     fullWidth
                     label="Product Price"
+                    type="number"
                     value={product.price}
                     onChange={(e) =>
                       handleProductInput(index, "price", e.target.value)
@@ -337,6 +526,9 @@ const Photos = () => {
               width: "100%",
               padding: "10px",
               fontSize: "16px",
+              '&:hover': {
+                backgroundColor: "#b31f1f",
+              },
             }}
           >
             Upload

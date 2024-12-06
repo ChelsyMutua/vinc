@@ -21,10 +21,6 @@ const app = express();
 // Middleware to parse JSON
 app.use(express.json());
 
-// Configure multer storage (use memory storage to get buffer data)
-const storage = multer.memoryStorage();
-const upload = multer({ storage: storage });
-
 // Initialize Supabase client
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -46,7 +42,7 @@ const pool = new Pool({
 });
 
 app.use(cors({
-  origin:  'http://localhost:5173', // Frontend URL
+  origin:  ['http://localhost:5173', 'https://vinc-production-3a9e.up.railway.app'], // Frontend URL
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true, // If you need to include cookies
@@ -356,154 +352,109 @@ app.get("/api/businesses", async (req, res) => {
   }
 });
 
-// Endpoint to upload business images (logo and cover image)
-app.post(
-  '/api/businesses/:business_id/upload-images',
-  upload.fields([{ name: 'logo' }, { name: 'cover_image' }]),
-  async (req, res) => {
-    const { business_id } = req.params;
-    const files = req.files;
-
-    try {
-      let logo_url = null;
-      let cover_image_url = null;
-
-      // Handle logo upload
-      if (files.logo && files.logo[0]) {
-        const { buffer, originalname, mimetype } = files.logo[0];
-        const filePath = `logos/${business_id}/${Date.now()}_${originalname}`;
-
-        // Upload to Supabase storage
-        const { data, error } = await supabase.storage
-          .from('business-assets')
-          .upload(filePath, buffer, {
-            cacheControl: '3600',
-            upsert: false,
-            contentType: mimetype,
-          });
-
-        if (error) throw error;
-
-        // Get public URL
-        const { data: urlData, error: publicURLError } = supabase.storage
-          .from('business-assets')
-          .getPublicUrl(filePath);
-
-        if (publicURLError) throw publicURLError;
-
-        logo_url = urlData.publicUrl;
-      }
-
-      // Handle cover image upload
-      if (files.cover_image && files.cover_image[0]) {
-        const { buffer, originalname, mimetype } = files.cover_image[0];
-        const filePath = `cover_images/${business_id}/${Date.now()}_${originalname}`;
-
-        // Upload to Supabase storage
-        const { data, error } = await supabase.storage
-          .from('business-assets')
-          .upload(filePath, buffer, {
-            cacheControl: '3600',
-            upsert: false,
-            contentType: mimetype,
-          });
-
-        if (error) throw error;
-
-        // Get public URL
-        const { data: urlData, error: publicURLError } = supabase.storage
-          .from('business-assets')
-          .getPublicUrl(filePath);
-
-        if (publicURLError) throw publicURLError;
-
-        cover_image_url = urlData.publicUrl;
-      }
-
-      // Update the database
-      const queryText = `
-        UPDATE businesses
-        SET
-          logo_url = COALESCE($1, logo_url),
-          cover_image_url = COALESCE($2, cover_image_url)
-        WHERE business_id = $3
-        RETURNING *;
-      `;
-
-      const values = [logo_url, cover_image_url, business_id];
-
-      const result = await pool.query(queryText, values);
-
-      res.json({
-        message: 'Images uploaded successfully',
-        business: result.rows[0],
-      });
-    } catch (error) {
-      console.error('Error uploading images:', error);
-      res.status(500).json({ error: 'Error uploading images' });
+// Configure Multer (in-memory storage)
+const storage = multer.memoryStorage();
+const upload = multer({
+  storage,
+  fileFilter: (req, file, cb) => {
+    const filetypes = /jpeg|jpg|png|gif/;
+    const mimetype = filetypes.test(file.mimetype);
+    const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+    if (mimetype && extname) {
+      return cb(null, true);
     }
-  }
-);
+    cb(new Error('Only image files are allowed!'));
+  },
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+});
 
-// Endpoint to upload product image
-app.post(
-  '/api/products/:product_id/upload-image',
-  upload.single('product_image'),
-  async (req, res) => {
-    const { product_id } = req.params;
-    const file = req.file;
+// Endpoint to Upload Logo and Cover Image
+app.post('/upload/business', upload.fields([{ name: 'logo' }, { name: 'cover_image' }]), async (req, res) => {
+  try {
+    const logoFile = req.files['logo']?.[0];
+    const coverImageFile = req.files['cover_image']?.[0];
 
-    try {
-      let product_image_url = null;
+    const uploads = {};
 
-      if (file) {
-        const { buffer, originalname, mimetype } = file;
-        const filePath = `product_images/${product_id}/${Date.now()}_${originalname}`;
-
-        // Upload to Supabase storage
-        const { data, error } = await supabase.storage
-          .from('product-assets')
-          .upload(filePath, buffer, {
-            cacheControl: '3600',
-            upsert: false,
-            contentType: mimetype,
-          });
-
-        if (error) throw error;
-
-        // Get public URL
-        const { data: urlData, error: publicURLError } = supabase.storage
-          .from('product-assets')
-          .getPublicUrl(filePath);
-
-        if (publicURLError) throw publicURLError;
-
-        product_image_url = urlData.publicUrl;
-      }
-
-      // Update the database
-      const queryText = `
-        UPDATE products
-        SET
-          product_image_url = COALESCE($1, product_image_url)
-        WHERE product_id = $2
-        RETURNING *;
-      `;
-
-      const values = [product_image_url, product_id];
-
-      const result = await pool.query(queryText, values);
-
-      res.json({
-        message: 'Product image uploaded successfully',
-        product: result.rows[0],
-      });
-    } catch (error) {
-      console.error('Error uploading product image:', error);
-      res.status(500).json({ error: 'Error uploading product image' });
+    if (logoFile) {
+      const logoFilename = `logo_${Date.now()}_${logoFile.originalname}`;
+      const { error: logoError } = await supabase.storage
+        .from(process.env.SUPABASE_STORAGE_BUCKET)
+        .upload(logoFilename, logoFile.buffer, {
+          cacheControl: '3600',
+          upsert: false,
+          contentType: logoFile.mimetype,
+        });
+      if (logoError) throw logoError;
+      const { publicURL } = supabase.storage.from(process.env.SUPABASE_STORAGE_BUCKET).getPublicUrl(logoFilename);
+      uploads.logo_url = publicURL;
     }
+
+    if (coverImageFile) {
+      const coverFilename = `cover_${Date.now()}_${coverImageFile.originalname}`;
+      const { error: coverError } = await supabase.storage
+        .from(process.env.SUPABASE_STORAGE_BUCKET)
+        .upload(coverFilename, coverImageFile.buffer, {
+          cacheControl: '3600',
+          upsert: false,
+          contentType: coverImageFile.mimetype,
+        });
+      if (coverError) throw coverError;
+      const { publicURL } = supabase.storage.from(process.env.SUPABASE_STORAGE_BUCKET).getPublicUrl(coverFilename);
+      uploads.cover_image = publicURL;
+    }
+
+    // Insert into 'businesses' table
+    const insertQuery = 'INSERT INTO businesses (logo_url, cover_image) VALUES ($1, $2) RETURNING *';
+    const values = [uploads.logo_url || null, uploads.cover_image || null];
+    const { rows } = await pool.query(insertQuery, values);
+
+    res.status(200).json({ message: 'Business images uploaded successfully', data: rows[0] });
+  } catch (error) {
+    console.error('Business Upload Error:', error);
+    res.status(500).json({ error: 'Failed to upload business images.' });
   }
-);
+});
+
+// Endpoint to Upload Product Image
+app.post('/upload/product', upload.single('product_image'), async (req, res) => {
+  try {
+    const productImageFile = req.file;
+
+    if (!productImageFile) {
+      return res.status(400).json({ error: 'No product image uploaded.' });
+    }
+
+    const productFilename = `product_${Date.now()}_${productImageFile.originalname}`;
+    const { error: uploadError } = await supabase.storage
+      .from(process.env.SUPABASE_STORAGE_BUCKET)
+      .upload(productFilename, productImageFile.buffer, {
+        cacheControl: '3600',
+        upsert: false,
+        contentType: productImageFile.mimetype,
+      });
+
+    if (uploadError) throw uploadError;
+
+    const { publicURL } = supabase.storage.from(process.env.SUPABASE_STORAGE_BUCKET).getPublicUrl(productFilename);
+
+    // Insert into 'products' table
+    const insertQuery = 'INSERT INTO products (product_image_url) VALUES ($1) RETURNING *';
+    const values = [publicURL];
+    const { rows } = await pool.query(insertQuery, values);
+
+    res.status(200).json({ message: 'Product image uploaded successfully', data: rows[0] });
+  } catch (error) {
+    console.error('Product Upload Error:', error);
+    res.status(500).json({ error: 'Failed to upload product image.' });
+  }
+});
+
+// Global Error Handler
+app.use((err, req, res, next) => {
+  console.error('Global Error:', err);
+  res.status(400).json({ error: err.message });
+});
 
 
 

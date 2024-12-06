@@ -1,148 +1,73 @@
-import { Form, Input, Button, Layout, Typography, Space, message } from "antd";
+import { Form, Input, Button, Layout, Typography, Space } from "antd";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { PhoneOutlined, EnvironmentOutlined, ShopOutlined, UserOutlined, MailOutlined } from "@ant-design/icons";
-import { useState, useEffect } from 'react';
-import { businessData } from "./businessData";
-import { Marker } from '@react-google-maps/api';
-import MapLocation from './map_location';
-
-
-
+import { useState } from 'react';
 
 const { Content } = Layout;
 const { Title } = Typography;
 
-
-const API_BASE_URL = 'https://vinc-production-3a9e.up.railway.app'; // Backend base URL
-
-const axiosInstance = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  withCredentials: true, // Include cookies for authentication if needed
-});
-
-// Function to submit business profile
-export async function submitBusinessProfile(values) {
-  try {
-    const { data } = await axiosInstance.post('api/businesses/profile', values);
-    return { success: true, message: data.message, business: data.business };
-  } catch (error) {
-    const errorMessage =
-      error.response?.data?.message || 'Failed to create business profile. Please try again.';
-    return { success: false, message: errorMessage };
-  }
-}
-
 export default function BusinessSignUp() {
   const [form] = Form.useForm();
   const navigate = useNavigate();
+
+  const onFinish = async (values) => {
+    console.log("Received values:", values);
   
-
-    // State for business locations
-    const [businessLocations, setBusinessLocations] = useState([]);
-
-// Fetch business locations
-useEffect(() => {
-  axios
-    .get("/api/businesses")
-    .then((response) => {
-      setBusinessLocations(response.data);
-    })
-    .catch((error) => {
-      console.error("Error fetching business locations:", error);
-    });
-}, []);
-
-function getFullAddress(business) {
-  const { address, apartmentSuite, city, postalCode } = business;
-  let fullAddress = address;
-
-  if (apartmentSuite) {
-    fullAddress += `, ${apartmentSuite}`;
-  }
-
-  fullAddress += `, ${city}, ${postalCode}`;
-  return fullAddress;
-}
-
-async function geocodeAddress(address) {
-  try {
-    const response = await axios.get(
-      "https://maps.googleapis.com/maps/api/geocode/json",
-      {
-        params: {
-          address: address,
-          key: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
-        },
+    // Prepare data to send to the backend
+    const businessDataToSend = {
+      business_name: values.businessName,        // Changed to snake_case
+      phone_number: values.phoneNumber,         // Changed to snake_case
+      address: values.address,
+      app_suite: values.aptSuite,               // Changed to snake_case
+      city: values.city,
+      postal_code: values.postalCode,           // Changed to snake_case
+      first_name: values.firstName,             // Changed to snake_case
+      last_name: values.lastName,               // Changed to snake_case
+      email: values.email,
+      password: values.password,
+      confirm: values.confirm,                   // Included confirm field
+      // Optional fields (ensure backend can handle these as optional)
+      description: values.description || "",     // Add description if available
+      state: values.state || "",                 // Add state if available
+      country: values.country || "",             // Add country if available
+    };
+  
+    // Send data to the backend
+    try {
+      const response = await axios.post(
+        "https://vinc-production-3a9e.up.railway.app/api/businesses/profile",
+        businessDataToSend,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          withCredentials: true, // Include credentials if your backend uses sessions
+        }
+      );
+      if (response.status === 201) {
+        alert("Business registered successfully!");
+  
+        // Navigate to confirmation page
+        navigate("/signup-confirmation");
       }
-    );
-
-    if (response.data.status === "OK") {
-      const location = response.data.results[0].geometry.location;
-      return {
-        latitude: location.lat,
-        longitude: location.lng,
-      };
-    } else {
-      console.error("Geocoding failed:", response.data.status);
-      return null;
+    } catch (error) {
+      console.error("Error registering business:", error);
+      if (error.response && error.response.data && error.response.data.message) {
+        alert(`Error: ${error.response.data.message}`);
+      } else {
+        alert("An error occurred while registering the business.");
+      }
     }
-  } catch (error) {
-    console.error("Error during geocoding:", error);
-    return null;
-  }
-}
-
-const onFinish = async (values) => {
-  console.log("Received values:", values);
-
-  // Combine address components
-  const fullAddress = getFullAddress({
-    address: values.address,
-    apartmentSuite: values.aptSuite, // Corrected key
-    city: values.city,
-    postalCode: values.postalCode,
-  });
-
-  // Geocode the address
-  const coordinates = await geocodeAddress(fullAddress);
-
-  if (!coordinates) {
-    alert("Unable to determine location from the provided address.");
-    return;
-  }
-
-  // Prepare data to send to the backend, including coordinates
-  const businessDataToSend = {
-    ...values,
-    latitude: coordinates.latitude,
-    longitude: coordinates.longitude,
   };
-
-  // Send data to the backend
-  try {
-    const response = await axios.post("/api/businesses", businessDataToSend);
-    if (response.status === 201) {
-      alert("Business registered successfully!");
-      navigate("/signup-confirmation");
-    }
-  } catch (error) {
-    console.error("Error registering business:", error);
-    alert("An error occurred while registering the business.");
-  }
-};
-
-const categories = businessData.map((category) => category.category);
+  
 
   return (
     <Layout style={{ minHeight: '100vh', backgroundColor: 'white' }}>
       <Content style={{ display: "flex" }}>
         {/* Left side with logo */}
         <div style={{ flex: 1, display: "flex", justifyContent: "center", alignItems: "center" }}>
-          <img src="public/assets/side_image.png" alt="Vinciniti Logo" style={{ maxWidth: "80%" }} />
+          <img src="/assets/side_image.png" alt="Vinciniti Logo" style={{ maxWidth: "80%" }} />
         </div>
 
         {/* Right side with form */}
@@ -155,7 +80,7 @@ const categories = businessData.map((category) => category.category);
             layout="vertical"
             scrollToFirstError
           >
-            {/* Form fields here */}
+            {/* Form fields */}
             <Form.Item
               name="businessName"
               label="Business Name"
@@ -235,12 +160,15 @@ const categories = businessData.map((category) => category.category);
             <Form.Item
               name="password"
               rules={[{ required: true, message: "Please input your password!" }]}
+              hasFeedback
             >
-              <Input placeholder="Password" type="password" />
+              <Input.Password placeholder="Password" />
             </Form.Item>
 
             <Form.Item
               name="confirm"
+              dependencies={['password']}
+              hasFeedback
               rules={[
                 { required: true, message: "Please confirm your password!" },
                 ({ getFieldValue }) => ({
@@ -253,7 +181,7 @@ const categories = businessData.map((category) => category.category);
                 }),
               ]}
             >
-              <Input type="password" placeholder="Confirm Password" />
+              <Input.Password placeholder="Confirm Password" />
             </Form.Item>
 
             <Form.Item>
@@ -266,16 +194,6 @@ const categories = businessData.map((category) => category.category);
               </Button>
             </Form.Item>
           </Form>
-
-          <MapLocation>
-          {businessLocations.map((business) => (
-              <Marker
-                key={business.id}
-                position={{ lat: business.latitude, lng: business.longitude }}
-                title={business.name}
-              />
-            ))}
-          </MapLocation>
         </div>
       </Content>
     </Layout>

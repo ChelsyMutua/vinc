@@ -147,7 +147,7 @@ const Photos = () => {
    */
   const handleSubmit = async () => {
     try {
-      const apiBaseUrl = ['http://localhost:5173', 'https://vinc-production-3a9e.up.railway.app']; 
+      const apiBaseUrl = 'https://vinc-production-3a9e.up.railway.app'; 
       const uploadPromises = [];
       const uploads = {};
 

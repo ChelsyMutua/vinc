@@ -22,8 +22,8 @@ app.use(express.json());
 
 // Initialize Supabase client
 const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_ANON_KEY
+  'https://eqorxvyjwnmcaljvjbon.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVxb3J4dnlqd25tY2FsanZqYm9uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzIxMzcwMDUsImV4cCI6MjA0NzcxMzAwNX0.dn0uoZXnlgQuLsbvXADnt9Kaw1MA7Z_waRB5XPzQFVA'
 );
 
 
@@ -136,7 +136,7 @@ const storage = multer.memoryStorage();
 const upload = multer({
   storage,
   fileFilter: (req, file, cb) => {
-    const filetypes = /jpeg|jpg|png|gif/;
+    const filetypes = '/jpeg|jpg|png|gif/';
     const mimetype = filetypes.test(file.mimetype);
     const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
     if (mimetype && extname) {
@@ -158,33 +158,33 @@ app.post('/upload/business', upload.fields([{ name: 'logo' }, { name: 'cover_ima
     if (logoFile) {
       const logoFilename = `logo_${Date.now()}_${logoFile.originalname}`;
       const { error: logoError } = await supabase.storage
-        .from(process.env.SUPABASE_STORAGE_BUCKET)
+        .from('images')
         .upload(logoFilename, logoFile.buffer, {
           cacheControl: '3600',
           upsert: false,
           contentType: logoFile.mimetype,
         });
       if (logoError) throw logoError;
-      const { publicURL } = supabase.storage.from(process.env.SUPABASE_STORAGE_BUCKET).getPublicUrl(logoFilename);
+      const { publicURL } = supabase.storage.from('images').getPublicUrl(logoFilename);
       uploads.logo_url = publicURL;
     }
 
     if (coverImageFile) {
       const coverFilename = `cover_${Date.now()}_${coverImageFile.originalname}`;
       const { error: coverError } = await supabase.storage
-        .from(process.env.SUPABASE_STORAGE_BUCKET)
+        .from('images')
         .upload(coverFilename, coverImageFile.buffer, {
           cacheControl: '3600',
           upsert: false,
           contentType: coverImageFile.mimetype,
         });
       if (coverError) throw coverError;
-      const { publicURL } = supabase.storage.from(process.env.SUPABASE_STORAGE_BUCKET).getPublicUrl(coverFilename);
+      const { publicURL } = supabase.storage.from('images').getPublicUrl(coverFilename);
       uploads.cover_image = publicURL;
     }
 
     // Insert into 'businesses' table
-    const insertQuery = 'INSERT INTO businesses (logo_url, cover_image) VALUES ($1, $2) RETURNING *';
+    const insertQuery = 'INSERT INTO businesses (logo_url, cover_image_url) VALUES ($1, $2) RETURNING *';
     const values = [uploads.logo_url || null, uploads.cover_image || null];
     const { rows } = await pool.query(insertQuery, values);
 
@@ -206,7 +206,7 @@ app.post('/upload/product', upload.single('product_image'), async (req, res) => 
 
     const productFilename = `product_${Date.now()}_${productImageFile.originalname}`;
     const { error: uploadError } = await supabase.storage
-      .from(process.env.SUPABASE_STORAGE_BUCKET)
+      .from('images')
       .upload(productFilename, productImageFile.buffer, {
         cacheControl: '3600',
         upsert: false,
@@ -215,7 +215,7 @@ app.post('/upload/product', upload.single('product_image'), async (req, res) => 
 
     if (uploadError) throw uploadError;
 
-    const { publicURL } = supabase.storage.from(process.env.SUPABASE_STORAGE_BUCKET).getPublicUrl(productFilename);
+    const { publicURL } = supabase.storage.from('images').getPublicUrl(productFilename);
 
     // Insert into 'products' table
     const insertQuery = 'INSERT INTO products (product_image_url) VALUES ($1) RETURNING *';
@@ -540,28 +540,28 @@ app.post(
     if (logoFile) {
       const logoFilename = `logo_${Date.now()}_${logoFile.originalname}`;
       const { error: logoError } = await supabase.storage
-        .from(process.env.SUPABASE_STORAGE_BUCKET)
+        .from('images')
         .upload(logoFilename, logoFile.buffer, {
           cacheControl: '3600',
           upsert: false,
           contentType: logoFile.mimetype,
         });
       if (logoError) throw logoError;
-      const { publicURL } = supabase.storage.from(process.env.SUPABASE_STORAGE_BUCKET).getPublicUrl(logoFilename);
+      const { publicURL } = supabase.storage.from('images').getPublicUrl(logoFilename);
       uploads.logo_url = publicURL;
     }
 
     if (coverImageFile) {
       const coverFilename = `cover_${Date.now()}_${coverImageFile.originalname}`;
       const { error: coverError } = await supabase.storage
-        .from(process.env.SUPABASE_STORAGE_BUCKET)
+        .from('images')
         .upload(coverFilename, coverImageFile.buffer, {
           cacheControl: '3600',
           upsert: false,
           contentType: coverImageFile.mimetype,
         });
       if (coverError) throw coverError;
-      const { publicURL } = supabase.storage.from(process.env.SUPABASE_STORAGE_BUCKET).getPublicUrl(coverFilename);
+      const { publicURL } = supabase.storage.from('images').getPublicUrl(coverFilename);
       uploads.cover_image = publicURL;
     }
 
@@ -588,7 +588,7 @@ app.post('/upload/product', upload.single('product_image'), async (req, res) => 
 
     const productFilename = `product_${Date.now()}_${productImageFile.originalname}`;
     const { error: uploadError } = await supabase.storage
-      .from(process.env.SUPABASE_STORAGE_BUCKET)
+      .from('images')
       .upload(productFilename, productImageFile.buffer, {
         cacheControl: '3600',
         upsert: false,
@@ -597,7 +597,7 @@ app.post('/upload/product', upload.single('product_image'), async (req, res) => 
 
     if (uploadError) throw uploadError;
 
-    const { publicURL } = supabase.storage.from(process.env.SUPABASE_STORAGE_BUCKET).getPublicUrl(productFilename);
+    const { publicURL } = supabase.storage.from('images').getPublicUrl(productFilename);
 
     // Insert into 'products' table
     const insertQuery = 'INSERT INTO products (product_image_url) VALUES ($1) RETURNING *';

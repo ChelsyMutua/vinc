@@ -9,9 +9,6 @@ const bcrypt = require('bcryptjs');
 const session = require('express-session');
 const PgSession = require('connect-pg-simple')(session);
 
-const multer = require('multer');
-const { createClient } = require('@supabase/supabase-js');
-
 
 
 // Load environment variables

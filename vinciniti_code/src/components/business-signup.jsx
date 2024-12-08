@@ -2,7 +2,6 @@ import { Form, Input, Button, Layout, Typography, Space } from "antd";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { PhoneOutlined, EnvironmentOutlined, ShopOutlined, UserOutlined, MailOutlined } from "@ant-design/icons";
-import { useState } from 'react';
 
 const { Content } = Layout;
 const { Title } = Typography;

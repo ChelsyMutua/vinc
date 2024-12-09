@@ -1276,7 +1276,7 @@ router.put('/reviews/:reviewId/reply', async (req, res) => {
 });
 
 // first part business profile 
-router.post('/api/businesses/profile', async (req, res) => {
+router.post('/businesses/profile', async (req, res) => {
   const {
     first_name,
     last_name,

@@ -1275,76 +1275,114 @@ router.put('/reviews/:reviewId/reply', async (req, res) => {
   }
 });
 
-
-// Define the server port
-const PORT = process.env.PORT || 3000;
-
-// Route to register a business
-app.post('/api/businesses/profile', async (req, res) => {
+// first part business profile 
+router.post('/businesses/profile', async (req, res) => {
   const {
-    business_name,
-    phone_number,
-    address,
-    app_suite,
-    city,
-    postal_code,
     first_name,
     last_name,
     email,
     password,
-    description,
-    state,
-    country,
+    confirm_password,
+    business_name,
+    phone_number,
+    address,
+    city,
+    postal_code,
+    app_suite
   } = req.body;
 
+  // Validate mandatory fields for both cases
+  if (!business_name || !phone_number || !address || !city || !postal_code) {
+    return res.status(400).json({ message: 'Business name, phone number, address, city, and postal code are required' });
+  }
+
+  // Check if passwords match
+  if (password && password !== confirm_password) {
+    return res.status(400).json({ message: 'Passwords do not match' });
+  }
+
   try {
-    // Check if email is already registered
-    const existingUser = await pool.query(
-      'SELECT * FROM businesses WHERE email = $1',
-      [email]
-    );
-    if (existingUser.rows.length > 0) {
-      return res.status(400).json({ message: 'Email is already registered.' });
+    let userId;
+
+    if (req.session.userId) {
+      // For existing users
+      userId = req.session.userId;
+
+      // Retrieve user details
+      const userResult = await pool.query('SELECT * FROM users WHERE user_id = $1', [userId]);
+      if (userResult.rows.length === 0) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+
+      const user = userResult.rows[0];
+
+      // Validate password confirmation for existing users
+      const isValidPassword = await bcrypt.compare(password, user.password_hash);
+      if (!isValidPassword) {
+        return res.status(401).json({ message: 'Invalid password confirmation' });
+      }
+
+      // Update user role to 'business_owner' if not already set
+      if (user.role !== 'business_owner') {
+        await pool.query('UPDATE users SET role = $1 WHERE user_id = $2', ['business_owner', userId]);
+      }
+    } else {
+      // For new users
+      if (!first_name || !last_name || !email || !password) {
+        return res.status(400).json({ message: 'First name, last name, email, and password are required for signup' });
+      }
+
+      // Check if email already exists
+      const emailCheck = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+      if (emailCheck.rows.length > 0) {
+        return res.status(400).json({ message: 'Email already exists' });
+      }
+
+      // Hash the password
+      const saltRounds = 10;
+      const password_hash = await bcrypt.hash(password, saltRounds);
+
+      // Create new user as 'business_owner'
+      const userResult = await pool.query(
+        `INSERT INTO users (first_name, last_name, email, password_hash, role) 
+         VALUES ($1, $2, $3, $4, $5) 
+         RETURNING user_id`,
+        [first_name, last_name, email, password_hash, 'business_owner']
+      );
+      userId = userResult.rows[0].user_id;
     }
 
-    // Hash the password
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Insert new business into the database
-    const newBusiness = await pool.query(
+    // Insert business profile
+    const businessResult = await pool.query(
       `INSERT INTO businesses (
-        business_name, phone_number, address, app_suite, city, postal_code, 
-        first_name, last_name, email, password, description, state, country
-      ) VALUES (
-        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13
-      ) RETURNING id`,
-      [
-        business_name,
-        phone_number,
-        address,
-        app_suite || null,
-        city,
-        postal_code,
-        first_name,
-        last_name,
-        email,
-        hashedPassword,
-        description || null,
-        state || null,
-        country || null,
-      ]
+         owner_id, 
+         business_name, 
+         phone_number, 
+         address, 
+         city, 
+         postal_code, 
+         app_suite
+       ) 
+       VALUES ($1, $2, $3, $4, $5, $6, $7) 
+       RETURNING business_id, business_name, phone_number, address, city, postal_code, app_suite`,
+      [userId, business_name, phone_number, address, city, postal_code, app_suite]
     );
 
-    // Respond with success message
     res.status(201).json({
-      message: 'Business registered successfully!',
-      businessId: newBusiness.rows[0].id,
+      message: 'Business profile created successfully',
+      business: businessResult.rows[0],
     });
   } catch (error) {
-    console.error('Error registering business:', error);
-    res.status(500).json({ message: 'Server error. Please try again later.' });
+    console.error('Error creating business profile:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
   }
 });
+
+
+// Define the server port
+const PORT = process.env.PORT || 3000;
+
+
 
 
 app.listen(PORT, () => {

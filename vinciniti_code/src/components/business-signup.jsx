@@ -15,22 +15,29 @@ export default function BusinessSignUp() {
   
     // Prepare data to send to the backend
     const businessDataToSend = {
-      first_name: values.firstName,
-      last_name: values.lastName,
-      email: values.email,
-      password: values.password,
-      confirm_password: values.confirm, // Backend expects confirm_password
-      business_name: values.businessName,
-      phone_number: values.phoneNumber,
-      address: values.address,
-      city: values.city,
-      postal_code: values.postalCode,
-      app_suite: values.aptSuite || "", // Optional field
+      business_name: values.businessName,        // Business Name
+      business_phone_number: values.phoneNumber, // Change this line
+      address: values.address,                   // Address
+      app_suite: values.aptSuite || "",         // Set to empty string if undefined
+      city: values.city,                        // City
+      postal_code: values.postalCode,           // Postal Code
+      first_name: values.firstName,             // First Name
+      last_name: values.lastName,               // Last Name
+      email: values.email,                       // Email
+      password: values.password,                 // Password
+      confirm_password: values.confirm,          // Confirm Password
+      description: values.description || "",     // Description (optional)
+      state: values.state || "",                 // State (optional)
+      country: values.country || "",             // Country (optional)
     };
   
+    // Log the data being sent
+    console.log("Business Data to Send:", businessDataToSend);
+  
+    // Send data to the backend
     try {
       const response = await axios.post(
-        "https://vinc-production-3a9e.up.railway.app/businesses/profile",
+        "https://vinc-production-3a9e.up.railway.app/api/businesses/transition",
         businessDataToSend,
         {
           headers: {

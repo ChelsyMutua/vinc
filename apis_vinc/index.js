@@ -1271,6 +1271,47 @@ router.put('/reviews/:reviewId/reply', async (req, res) => {
 });
 
 
+router.get('/businesses/info', async (req, res) => {
+  try {
+    if (!req.session.userId) {
+      return res.status(401).json({ message: 'Unauthorized: Please log in' });
+    }
+
+    const userResult = await pool.query('SELECT * FROM users WHERE user_id = $1', [req.session.userId]);
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const user = userResult.rows[0];
+
+    if (user.role !== 'business_owner') {
+      return res.status(403).json({ message: 'Access denied: User is not a business owner' });
+    }
+
+    const businessResult = await pool.query(
+      `SELECT b.business_name, b.address, b.phone_number, 
+              ARRAY_AGG(c.name) AS categories 
+       FROM businesses b 
+       LEFT JOIN business_categories bc ON b.business_id = bc.business_id 
+       LEFT JOIN categories c ON bc.category_id = c.category_id
+       WHERE b.owner_id = $1
+       GROUP BY b.business_id`,
+      [user.user_id]
+    );
+
+    if (businessResult.rows.length === 0) {
+      return res.status(404).json({ message: 'Business not found' });
+    }
+
+    res.json(businessResult.rows[0]);
+  } catch (error) {
+    console.error('Error fetching business info:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
+
+
+
 // Define the server port
 const PORT = process.env.PORT || 3000;
 

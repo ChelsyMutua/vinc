@@ -1279,6 +1279,73 @@ router.put('/reviews/:reviewId/reply', async (req, res) => {
 // Define the server port
 const PORT = process.env.PORT || 3000;
 
+// Route to register a business
+app.post('/api/businesses/profile', async (req, res) => {
+  const {
+    business_name,
+    phone_number,
+    address,
+    app_suite,
+    city,
+    postal_code,
+    first_name,
+    last_name,
+    email,
+    password,
+    description,
+    state,
+    country,
+  } = req.body;
+
+  try {
+    // Check if email is already registered
+    const existingUser = await pool.query(
+      'SELECT * FROM businesses WHERE email = $1',
+      [email]
+    );
+    if (existingUser.rows.length > 0) {
+      return res.status(400).json({ message: 'Email is already registered.' });
+    }
+
+    // Hash the password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Insert new business into the database
+    const newBusiness = await pool.query(
+      `INSERT INTO businesses (
+        business_name, phone_number, address, app_suite, city, postal_code, 
+        first_name, last_name, email, password, description, state, country
+      ) VALUES (
+        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13
+      ) RETURNING id`,
+      [
+        business_name,
+        phone_number,
+        address,
+        app_suite || null,
+        city,
+        postal_code,
+        first_name,
+        last_name,
+        email,
+        hashedPassword,
+        description || null,
+        state || null,
+        country || null,
+      ]
+    );
+
+    // Respond with success message
+    res.status(201).json({
+      message: 'Business registered successfully!',
+      businessId: newBusiness.rows[0].id,
+    });
+  } catch (error) {
+    console.error('Error registering business:', error);
+    res.status(500).json({ message: 'Server error. Please try again later.' });
+  }
+});
+
 
 app.listen(PORT, () => {
   console.log(`Server is running on ${PORT}`);

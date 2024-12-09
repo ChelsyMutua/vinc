@@ -11,8 +11,21 @@ const BusinessCard = ({ name, rating, logo, businessId, openingTime, closingTime
     navigate(`/business/${businessId}`);
   };
 
+  // Validate and fallback for `rating`
+  const validRating = typeof rating === 'number' && !isNaN(rating) ? rating.toFixed(1) : "N/A";
+
   return (
-    <Card sx={{ backgroundColor: '#f9f9f9',width: 400, height: 360, margin: 2, cursor: 'pointer', borderRadius: '14px'}} onClick={handleCardClick}>
+    <Card
+      sx={{
+        backgroundColor: '#f9f9f9',
+        width: 400,
+        height: 360,
+        margin: 2,
+        cursor: 'pointer',
+        borderRadius: '14px'
+      }}
+      onClick={handleCardClick}
+    >
       {/* Business Logo */}
       <Box
         sx={{
@@ -24,12 +37,16 @@ const BusinessCard = ({ name, rating, logo, businessId, openingTime, closingTime
           position: "relative"
         }}
       >
-       <img src={logo} alt={name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+        <img
+          src={logo}
+          alt={name}
+          style={{ width: "100%", height: "100%", objectFit: "cover" }}
+        />
         <Box
           sx={{
             position: "absolute",
             bottom: 10,
-            left:8,
+            left: 8,
             width: 'auto',
             bgcolor: "rgba(0, 0, 0, 0.6)",
             color: "white",
@@ -40,9 +57,9 @@ const BusinessCard = ({ name, rating, logo, businessId, openingTime, closingTime
           }}
         >
           <Box sx={{ display: "flex", alignItems: "center" }}>
-          <Star sx={{ color: "#FFD700", fontSize: "1rem" }} />
+            <Star sx={{ color: "#FFD700", fontSize: "1rem" }} />
             <Typography variant="body2" sx={{ marginLeft: 0.5 }}>
-              {rating.toFixed(1)} ({reviews} reviews)
+              {validRating} ({reviews} reviews)
             </Typography>
           </Box>
         </Box>
@@ -64,15 +81,22 @@ const BusinessCard = ({ name, rating, logo, businessId, openingTime, closingTime
   );
 };
 
+// Prop types
 BusinessCard.propTypes = {
   name: PropTypes.string.isRequired,
-  rating: PropTypes.number.isRequired,
+  rating: PropTypes.oneOfType([PropTypes.number, PropTypes.string]), // Allow fallback
   logo: PropTypes.string.isRequired,
   businessId: PropTypes.string.isRequired,
   openingTime: PropTypes.string.isRequired,
   closingTime: PropTypes.string.isRequired,
   address: PropTypes.string.isRequired,
   reviews: PropTypes.number.isRequired,
+};
+
+// Default props
+BusinessCard.defaultProps = {
+  rating: 0, // Default to 0 if not provided
+  reviews: 0, // Default to 0 if not provided
 };
 
 export default BusinessCard;

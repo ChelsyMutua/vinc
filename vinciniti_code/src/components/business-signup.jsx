@@ -15,43 +15,39 @@ export default function BusinessSignUp() {
   
     // Prepare data to send to the backend
     const businessDataToSend = {
-      business_name: values.businessName,        // Changed to snake_case
-      phone_number: values.phoneNumber,         // Changed to snake_case
-      address: values.address,
-      app_suite: values.aptSuite,               // Changed to snake_case
-      city: values.city,
-      postal_code: values.postalCode,           // Changed to snake_case
-      first_name: values.firstName,             // Changed to snake_case
-      last_name: values.lastName,               // Changed to snake_case
+      first_name: values.firstName,
+      last_name: values.lastName,
       email: values.email,
       password: values.password,
-      confirm: values.confirm,                   // Included confirm field
-      // Optional fields (ensure backend can handle these as optional)
-      description: values.description || "",     // Add description if available
-      state: values.state || "",                 // Add state if available
-      country: values.country || "",             // Add country if available
+      confirm_password: values.confirm, // Backend expects confirm_password
+      business_name: values.businessName,
+      phone_number: values.phoneNumber,
+      address: values.address,
+      city: values.city,
+      postal_code: values.postalCode,
+      app_suite: values.aptSuite || "", // Optional field
     };
   
-    // Send data to the backend
     try {
       const response = await axios.post(
-        "https://vinc-production-3a9e.up.railway.app/api/businesses/profile",
+        "https://vinc-production-3a9e.up.railway.app/businesses/profile",
         businessDataToSend,
         {
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
           withCredentials: true, // Include credentials if your backend uses sessions
         }
       );
+  
       if (response.status === 201) {
         alert("Business registered successfully!");
-  
-        // Navigate to confirmation page
-        navigate("/signup-confirmation");
+        navigate("/signup-confirmation"); // Redirect to confirmation page
       }
     } catch (error) {
       console.error("Error registering business:", error);
+  
+      // Display error messages based on the response
       if (error.response && error.response.data && error.response.data.message) {
         alert(`Error: ${error.response.data.message}`);
       } else {
@@ -59,6 +55,7 @@ export default function BusinessSignUp() {
       }
     }
   };
+  
   
 
   return (
@@ -165,21 +162,24 @@ export default function BusinessSignUp() {
             </Form.Item>
 
             <Form.Item
-              name="confirm"
-              dependencies={['password']}
-              hasFeedback
-              rules={[
-                { required: true, message: "Please confirm your password!" },
-                ({ getFieldValue }) => ({
-                  validator(_, value) {
-                    if (!value || getFieldValue("password") === value) {
-                      return Promise.resolve();
-                    }
-                    return Promise.reject(new Error("The two passwords that you entered do not match!"));
-                  },
-                }),
-              ]}
-            >
+  name="confirm"
+  dependencies={['password']}
+  hasFeedback
+  rules={[
+    { required: true, message: "Please confirm your password!" },
+    ({ getFieldValue }) => ({
+      validator(_, value) {
+        if (!value || getFieldValue("password") === value) {
+          return Promise.resolve();
+        }
+        return Promise.reject(new Error("Passwords do not match!"));
+      },
+    }),
+  ]}
+>
+
+
+
               <Input.Password placeholder="Confirm Password" />
             </Form.Item>
 

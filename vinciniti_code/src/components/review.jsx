@@ -46,7 +46,10 @@ const Review = () => {
   };
 
   return (
- <Container>
+ <Container
+ sx={{
+  marginTop:"64px",
+ }}>
       {/* Header */}
       <header style={{ borderBottom: "1px solid #ddd", marginBottom: "20px", paddingBottom: "10px" }}>
         <h1 style={{ fontSize: "24px", margin: 0 }}>Temple Nightclub</h1>

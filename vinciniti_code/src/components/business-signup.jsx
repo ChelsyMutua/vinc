@@ -15,27 +15,29 @@ export default function BusinessSignUp() {
   
     // Prepare data to send to the backend
     const businessDataToSend = {
-      business_name: values.businessName,        // Changed to snake_case
-      phone_number: values.phoneNumber,         // Changed to snake_case
-      address: values.address,
-      app_suite: values.aptSuite,               // Changed to snake_case
-      city: values.city,
-      postal_code: values.postalCode,           // Changed to snake_case
-      first_name: values.firstName,             // Changed to snake_case
-      last_name: values.lastName,               // Changed to snake_case
-      email: values.email,
-      password: values.password,
-      confirm: values.confirm,                   // Included confirm field
-      // Optional fields (ensure backend can handle these as optional)
-      description: values.description || "",     // Add description if available
-      state: values.state || "",                 // Add state if available
-      country: values.country || "",             // Add country if available
+      business_name: values.businessName,        // Business Name
+      business_phone_number: values.phoneNumber, // Change this line
+      address: values.address,                   // Address
+      app_suite: values.aptSuite || "",         // Set to empty string if undefined
+      city: values.city,                        // City
+      postal_code: values.postalCode,           // Postal Code
+      first_name: values.firstName,             // First Name
+      last_name: values.lastName,               // Last Name
+      email: values.email,                       // Email
+      password: values.password,                 // Password
+      confirm_password: values.confirm,          // Confirm Password
+      description: values.description || "",     // Description (optional)
+      state: values.state || "",                 // State (optional)
+      country: values.country || "",             // Country (optional)
     };
+  
+    // Log the data being sent
+    console.log("Business Data to Send:", businessDataToSend);
   
     // Send data to the backend
     try {
       const response = await axios.post(
-        "https://vinc-production-3a9e.up.railway.app/api/businesses/profile",
+        "https://vinc-production-3a9e.up.railway.app/api/businesses/transition",
         businessDataToSend,
         {
           headers: {
